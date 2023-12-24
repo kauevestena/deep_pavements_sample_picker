@@ -1,0 +1,9 @@
+scipy
+opencv-python
+geopandas
+openpyxl
+mercantile
+wget
+requests
+tqdm
+pyarrow

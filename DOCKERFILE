@@ -1,0 +1,20 @@
+# FROM pytorch/pytorch:latest
+
+# to comply with the tested version:
+FROM pytorch@sha256:3387e598cb94fc248d82e712a65b10931a990cea3a2e76362ca30d135f565de4
+
+# dependency: lang-segment-anything
+RUN apt update
+RUN apt install -y git
+RUN apt install libgl1-mesa-glx -y
+RUN apt install libglib2.0-0 -y
+RUN git clone https://github.com/kauevestena/lang-segment-anything.git
+RUN pip install -r lang-segment-anything/requirements.txt
+WORKDIR /lang-segment-anything
+RUN python running_test.py
+WORKDIR /
+
+# our requirements:
+RUN pip install -r requirements.txt
+
+
