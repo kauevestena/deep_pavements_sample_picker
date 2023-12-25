@@ -1,7 +1,12 @@
-# FROM pytorch/pytorch:latest
 
-# to comply with the tested version:
-FROM pytorch@sha256:3387e598cb94fc248d82e712a65b10931a990cea3a2e76362ca30d135f565de4
+# to comply with the tested version (at 24/12/2023):
+# FROM pytorch@sha256:3387e598cb94fc248d82e712a65b10931a990cea3a2e76362ca30d135f565de4
+FROM pytorch/pytorch:latest
+
+# prevent apt from hanging
+ARG DEBIAN_FRONTEND=noninteractive
+
+ENV HOME /root
 
 # dependency: lang-segment-anything
 RUN apt update
@@ -9,12 +14,17 @@ RUN apt install -y git
 RUN apt install libgl1-mesa-glx -y
 RUN apt install libglib2.0-0 -y
 RUN git clone https://github.com/kauevestena/lang-segment-anything.git
-RUN pip install -r lang-segment-anything/requirements.txt
-WORKDIR /lang-segment-anything
+WORKDIR lang-segment-anything
+RUN pip install -r requirements.txt
 RUN python running_test.py
-WORKDIR /
 
 # our requirements:
+WORKDIR $HOME
+COPY ./container_files ./container_files
+WORKDIR $HOME/container_files
 RUN pip install -r requirements.txt
+
+# stablishing a volume
+VOLUME /data
 
 
