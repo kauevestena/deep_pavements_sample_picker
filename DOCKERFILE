@@ -20,10 +20,10 @@ WORKDIR $HOME/lang-segment-anything
 RUN pip install -r requirements.txt
 RUN python running_test.py
 
-# our requirements:
+# this repository stuff:
 WORKDIR $HOME
-COPY ./container_files ./container_files
-WORKDIR $HOME/container_files
+RUN git clone https://github.com/kauevestena/deep_pavements.git
+WORKDIR $HOME/deep_pavements
 RUN pip install -r requirements.txt
 COPY mapillary_token mapillary_token
 
