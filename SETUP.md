@@ -17,3 +17,6 @@ include "--detach" to run in background and "--rm" to remove on exit
 create a file called "mapillary_token" in the project rootpath, containing your secret key.
 For security reasons, the file is added to the .gitgnore
 If it isn't created, the building process will fail. 
+
+# Configuring:
+

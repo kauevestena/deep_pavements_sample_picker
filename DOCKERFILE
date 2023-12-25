@@ -25,7 +25,7 @@ WORKDIR $HOME
 RUN git clone https://github.com/kauevestena/deep_pavements.git
 WORKDIR $HOME/deep_pavements
 RUN pip install -r requirements.txt
-COPY mapillary_token mapillary_token
+COPY mapillary_token configs/mapillary_token
 
 
 
