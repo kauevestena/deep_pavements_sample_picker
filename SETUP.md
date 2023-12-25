@@ -1,7 +1,19 @@
-## Running docker image
+## Running the docker image
+
+first buid:
 
     docker build --tag 'deep_pavements' .
 
-    docker run --gpus all -it 'deep_pavements'
+then run:
+
+    docker run --mount type=bind,source=D:\segmentation_img_data,target=/home/data --gpus all -it 'deep_pavements' 
+
+replace "D:\semantic_segmentation_data" with the desired path for mounting a volume were the outputs shall be generated
 
 include "--detach" to run in background and "--rm" to remove on exit
+
+# Mapillary token:
+
+create a file called "mapillary_token" in the project rootpath, containing your secret key.
+For security reasons, the file is added to the .gitgnore
+If it isn't created, the building process will fail. 
