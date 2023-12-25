@@ -6,9 +6,9 @@ first buid:
 
 then run:
 
-    docker run --mount type=bind,source=D:\segmentation_img_data,target=/home/data --gpus all -it 'deep_pavements' 
+    docker run --name running_deep_pavements --mount type=bind,source=D:\segmentation_img_data,target=/home/data --gpus all -it 'deep_pavements' 
 
-replace "D:\semantic_segmentation_data" with the desired path for mounting a volume were the outputs shall be generated
+replace "D:\semantic_segmentation_data" with the desired path for mounting a volume were the outputs shall be generated. If you wanna more than one running container, you can remove "--name running_deep_pavements". 
 
 include "--detach" to run in background and "--rm" to remove on exit
 
