@@ -167,3 +167,6 @@ configs/mapillary_token
 # tests:
 tests
 tests.py
+
+# territories infos:
+terr_polygons

@@ -1,15 +1,6 @@
-import requests
-import os
-import json
-import numpy as np
-from shapely.geometry import Point, box
-from math import cos, pi
-import urllib
 # from special_funcs import *
-from lib import *
-import wget
-from time import sleep
-import geopandas as gpd
+from libs.lib import *
+
 # from tqdm import tqdm
 
 
@@ -28,7 +19,7 @@ def random_point_in_bbox(input_bbox):
     Parameters:
         bbox (list): A list containing the coordinates of the bounding box in the format [min_lon, min_lat, max_lon, max_lat].
 
-    Returns:
+    Returns: 
         tuple: A tuple containing the latitude and longitude of the randomly generated point.
     """
     min_lon, min_lat, max_lon, max_lat = input_bbox

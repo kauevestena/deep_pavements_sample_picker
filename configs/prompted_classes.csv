@@ -1,12 +1,27 @@
 prompt,comment
-asphalt,default pavement class
-sett,default pavement class and test AI allucinating
-grass,default pavement class
+asphalt,default pavement surface class
+sett,default pavement surface class and test AI allucinating
+grass,default pavement surface class
 sidewalk,default for sidewalks
 street,default for streets
-poles,default for poles
-pavement,
 car,default for cars
-sidepath,
-sideways,
-path,
+poles,default for poles
+pavement,generic try for streets and sidewalks
+path,generic try for streets and sidewalks
+sidepath,generic try for sidewalks
+sideways,generic try for sidewalks
+cobblestone,default pavement surface class
+track,generic try for streets and sidewalks
+lateral,generic try for sidewalks and test AI allucinating
+walkway,generic try for sidewalks
+sidetrack,generic try for sidewalks
+anything,testing AI
+way,generic try for streets and sidewalks
+earth,default pavement surface class
+soil,default pavement surface class
+dirt,alternative pavement surface class
+sand,default pavement surface class
+concrete,default pavement surface class
+paving stones,default pavement surface class
+chipseal,default pavement surface class and test AI allucinating
+gravel,default pavement surface class and test AI allucinating
