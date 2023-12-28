@@ -12,6 +12,7 @@ import urllib
 import pandas as pd
 import csv
 import mercantile
+from tqdm import tqdm
 
 def create_dir_if_not_exists(path):
     if not os.path.exists(path):
@@ -153,3 +154,27 @@ def random_tile_bbox_in_gdf(gdf,as_list=False):
         return list(mercantile.bounds(random_tile))
     else:
         return mercantile.bounds(random_tile)
+    
+def selected_columns_to_str(df,desired_type=list):
+    for column in df.columns:
+        c_type = check_type_by_first_valid(df[column])
+        
+        if c_type == desired_type:
+            # print(column)
+            df[column] = df[column].apply(lambda x: str(x))
+
+def get_coordinates_as_point(inputdict):
+
+    return Point(inputdict['coordinates'])
+
+def check_type_by_first_valid(input_iterable):
+    for item in input_iterable:
+        if item:
+            return type(item)
+        
+
+def random_samples_in_gdf(gdf,num_samples=N_SAMPLES):
+    if num_samples > len(gdf):
+        num_samples = len(gdf)
+
+    return gdf.sample(num_samples)

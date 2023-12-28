@@ -11,7 +11,7 @@ def get_mapillary_token():
 # right after the function definition
 MAPPILARY_TOKEN = get_mapillary_token()
 
-def get_mapillary_images_metadata(minLat, minLon, maxLat, maxLon, token,outpath=None):
+def get_mapillary_images_metadata(minLon, minLat, maxLon, maxLat, token=MAPPILARY_TOKEN,outpath=None):
     """
     Request images from Mapillary API given a bbox
 
@@ -115,24 +115,25 @@ def download_mapillary_image(url, outfilepath,cooldown=1):
 
 def mapillary_data_to_gdf(data,outpath=None,filtering_polygon=None):
     
-    if isinstance(data,str):
-        data = read_json(data)
+    if data.get('data'):
 
-    as_df = pd.DataFrame.from_records(data['data'])
+        as_df = pd.DataFrame.from_records(data['data'])
 
-    as_df.geometry = as_df.geometry.apply(get_coordinates_as_point)
+        as_df.geometry = as_df.geometry.apply(get_coordinates_as_point)
 
-    as_gdf = gpd.GeoDataFrame(as_df,crs='EPSG:4326',geometry='geometry')
+        as_gdf = gpd.GeoDataFrame(as_df,crs='EPSG:4326',geometry='geometry')
 
-    selected_columns_to_str(as_gdf)
+        selected_columns_to_str(as_gdf)
 
-    if filtering_polygon:
-        as_gdf = as_gdf[as_gdf.intersects(filtering_polygon)]
+        if filtering_polygon:
+            as_gdf = as_gdf[as_gdf.intersects(filtering_polygon)]
 
-    if outpath:
-        as_gdf.to_file(outpath)
+        if outpath:
+            as_gdf.to_file(outpath)
 
-    return as_gdf
+        return as_gdf
+    else:
+        return gpd.GeoDataFrame()
 
 def tiled_mapillary_data_to_gdf(input_polygon, token,outpath=None):
 

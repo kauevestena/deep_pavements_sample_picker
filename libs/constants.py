@@ -2,6 +2,8 @@ PROMPTED_CLASSES = 7
 
 ZOOM_LEVEL = 17
 
+N_SAMPLES = 3
+
 classes_path = 'configs/classes.csv'
 territories_path = 'configs/territories.csv'
 

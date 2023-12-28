@@ -1,6 +1,4 @@
 from libs.mapillary_funcs import *
-from tqdm import tqdm
-
 
 
 def main():
@@ -30,11 +28,27 @@ def main():
 
         polygon_gdf = gdfs_dict[terr_name]
 
-        query_bbox = random_tile_bbox_in_gdf(polygon_gdf,as_list=True)
+        while True:
 
-        print(query_bbox)
-        
-                
+            query_bbox = random_tile_bbox_in_gdf(polygon_gdf,as_list=True)
+
+            mapillary_dict = get_mapillary_images_metadata(*query_bbox)
+
+            gdf = mapillary_data_to_gdf(mapillary_dict)
+
+            if not gdf.empty:
+                print('sucessfull with',len(gdf),'images')
+                break
+            else:
+                print('empty dataframe, trying again...')
+
+        # pick a random row in the gdf:
+        random_samples = random_samples_in_gdf(gdf)
+
+        for i in range(len(random_samples)):
+            row_gdf = random_samples.iloc[i:i+1]
+
+            print(row_gdf)
 
 
 
