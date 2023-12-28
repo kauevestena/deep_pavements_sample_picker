@@ -11,22 +11,6 @@ def get_mapillary_token():
 # right after the function definition
 MAPPILARY_TOKEN = get_mapillary_token()
 
-#function to define a random lat, lon in the bounding box:
-def random_point_in_bbox(input_bbox):
-    """
-    Generate a random point within a given bounding box.
-
-    Parameters:
-        bbox (list): A list containing the coordinates of the bounding box in the format [min_lon, min_lat, max_lon, max_lat].
-
-    Returns: 
-        tuple: A tuple containing the latitude and longitude of the randomly generated point.
-    """
-    min_lon, min_lat, max_lon, max_lat = input_bbox
-    lat = min_lat + (max_lat - min_lat) * np.random.random()
-    lon = min_lon + (max_lon - min_lon) * np.random.random()
-    return lon, lat
-
 def get_mapillary_images_metadata(minLat, minLon, maxLat, maxLon, token,outpath=None):
     """
     Request images from Mapillary API given a bbox

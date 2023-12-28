@@ -11,6 +11,7 @@ from math import cos, pi
 import urllib
 import pandas as pd
 import csv
+import mercantile
 
 def create_dir_if_not_exists(path):
     if not os.path.exists(path):
@@ -87,3 +88,68 @@ def get_territory_polygon(place_name,outpath=None):
 
     # Return the polygon
     return polygon
+
+
+def tilerange_from_bbox(minlat,minlon,maxlat,maxlon,zoom=ZOOM_LEVEL):
+    return mercantile.tiles(minlon,minlat,maxlon,maxlat,zoom)
+
+
+def tilebboxes_from_bbox(minlat,minlon,maxlat,maxlon,zoom=ZOOM_LEVEL,as_list=False):
+    if as_list:
+        return [list(mercantile.bounds(tile)) for tile in mercantile.tiles(minlon,minlat,maxlon,maxlat,zoom)]
+    else:
+        return [mercantile.bounds(tile) for tile in mercantile.tiles(minlon,minlat,maxlon,maxlat,zoom)]
+    
+def resort_bbox(bbox):
+    return [bbox[1],bbox[0],bbox[3],bbox[2]]
+
+
+def tile_bbox_to_box(tile_bbox,swap_latlon=False):
+    if swap_latlon:
+        return box(tile_bbox.south,tile_bbox.west,tile_bbox.north,tile_bbox.east)
+    else:
+        return box(tile_bbox.west,tile_bbox.south,tile_bbox.east,tile_bbox.north)
+    
+#function to define a random lat, lon in the bounding box:
+def random_point_in_bbox(input_bbox,as_point=False):
+    """
+    Generate a random point within a given bounding box.
+
+    Parameters:
+        bbox (list): A list containing the coordinates of the bounding box in the format [min_lon, min_lat, max_lon, max_lat].
+
+    Returns: 
+        tuple: A tuple containing the latitude and longitude of the randomly generated point.
+    """
+    min_lon, min_lat, max_lon, max_lat = input_bbox
+    lat = min_lat + (max_lat - min_lat) * np.random.random()
+    lon = min_lon + (max_lon - min_lon) * np.random.random()
+
+    if as_point:
+        return Point(lon, lat)
+    else:
+        return lon, lat
+    
+def random_point_in_gdf(gdf,as_tuple=False):
+    while True:
+        random_point = random_point_in_bbox(gdf.total_bounds,as_point=True)
+        if gdf.contains(random_point).any():
+            if as_tuple:
+                return random_point.x, random_point.y
+            else:
+                return random_point
+            
+def random_tile_in_gdf(gdf,as_list=False):
+    random_point = random_point_in_gdf(gdf,as_tuple=True)
+
+    if as_list:
+        return list(mercantile.tile(*random_point,zoom=ZOOM_LEVEL))
+    else:
+        return mercantile.tile(*random_point,zoom=ZOOM_LEVEL)
+    
+def random_tile_bbox_in_gdf(gdf,as_list=False):
+    random_tile = random_tile_in_gdf(gdf)
+    if as_list:
+        return list(mercantile.bounds(random_tile))
+    else:
+        return mercantile.bounds(random_tile)
