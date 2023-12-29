@@ -60,7 +60,7 @@ def main():
             row_gdf_series = row_gdf.iloc[0]
 
             # creating image basefolder:
-            img_folderpath = os.path.join(outfolderpath, territory, row_gdf_series.id)
+            img_folderpath = os.path.join(outfolderpath, terr_name, row_gdf_series.id)
 
             # generating folders for detections:
             detections_folderpath = os.path.join(img_folderpath, 'detections')
