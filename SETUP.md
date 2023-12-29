@@ -1,3 +1,18 @@
+# Configuring:
+
+Set the desired prompts at "configs/prompted_classes.csv", following the available model.
+Set the desired territories at "configs/territories.csv", following the available model, territories must be geocodable in Nomitatim API, in case of more than one results, the one with biggest "relevance" will be chosen.  
+
+In both cases watch for csv consistency (i recommend using CSVLint and RAinbowCSV).
+
+
+# Mapillary token:
+
+create a file called "mapillary_token" in the project rootpath, containing your secret key.
+For security reasons, the file is added to the .gitgnore
+If it isn't created, the building (check it below) process will fail. 
+
+
 ## Running the docker image
 
 first buid:
@@ -12,11 +27,12 @@ replace "D:\semantic_segmentation_data" with the desired path for mounting a vol
 
 include "--detach" to run in background and "--rm" to remove on exit
 
-# Mapillary token:
+# Running the sample colector:
 
-create a file called "mapillary_token" in the project rootpath, containing your secret key.
-For security reasons, the file is added to the .gitgnore
-If it isn't created, the building process will fail. 
+Inside the container:
 
-# Configuring:
+    python run.py
 
+Outside shall be: 
+
+    docker run running_deep_pavements python run.py

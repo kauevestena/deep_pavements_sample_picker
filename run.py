@@ -77,7 +77,7 @@ def main():
 
                 # saving metadata:
                 img_metadata_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.geojson')
-                row_gdf.to_file(img_metadata_path)
+                selected_columns_to_str(row_gdf).to_file(img_metadata_path)
                 detections_metadata_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.csv')
 
 
