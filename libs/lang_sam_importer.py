@@ -8,8 +8,6 @@ import numpy as np
 
 sys.path.append(lang_sam_path)
 
-print(sys.path)
-
 from lang_sam import LangSAM
 
 def draw_image_v2(image, masks, boxes, labels, alpha=0.3,draw_bboxes=False):
