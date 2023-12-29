@@ -4,3 +4,4 @@ mercantile
 wget
 requests
 tqdm
+Pillow

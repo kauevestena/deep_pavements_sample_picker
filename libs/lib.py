@@ -13,6 +13,8 @@ import pandas as pd
 import csv
 import mercantile
 from tqdm import tqdm
+from libs.lang_sam_importer import *
+import random
 
 def create_dir_if_not_exists(path):
     if not os.path.exists(path):
@@ -31,6 +33,10 @@ def get_territories_as_list():
         territories += [row.territory]*row.weight
 
     return territories
+
+def get_classes_as_list():
+    as_df = read_csv_file(classes_path)
+    return [row.class_prompt for row in as_df.itertuples()]
 
 # getting an infinite circular iterator:
 def infinite_circular_iterator(iterable):
@@ -178,3 +184,10 @@ def random_samples_in_gdf(gdf,num_samples=N_SAMPLES):
         num_samples = len(gdf)
 
     return gdf.sample(num_samples)
+
+def tensor_to_string(tensor, delimiter=' '):
+    return delimiter.join((str(v) for v in tensor.tolist()))
+
+def create_folderlist(folderpath_list):
+    for folderpath in folderpath_list:
+        create_dir_if_not_exists(folderpath)

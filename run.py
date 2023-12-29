@@ -2,9 +2,13 @@ from libs.mapillary_funcs import *
 
 
 def main():
+    model = LangSAM()
+
+
     create_dir_if_not_exists(terr_polygons_folder)
 
     territory_list = get_territories_as_list()
+    classes_list = get_classes_as_list()
 
     gdfs_dict = {}
 
@@ -12,8 +16,8 @@ def main():
     for territory in territory_list:
         terr_name = slugify(territory)
 
-        territory_folder = os.path.join(outfolderpath, terr_name)
-        create_dir_if_not_exists(territory_folder)
+        territory_folderpath = os.path.join(outfolderpath, terr_name)
+        create_dir_if_not_exists(territory_folderpath)
 
         # getting territory as a polygon using Nominatim OSM API:
         territory_polygon_path = os.path.join(terr_polygons_folder, f'{terr_name}.geojson') 
@@ -25,6 +29,9 @@ def main():
 
     for territory in tqdm(infinite_circular_iterator(territory_list)):
         print(territory,'turn now...')
+
+        terr_name = slugify(territory)
+        territory_folderpath = os.path.join(outfolderpath, terr_name)
 
         polygon_gdf = gdfs_dict[terr_name]
 
@@ -46,9 +53,54 @@ def main():
         random_samples = random_samples_in_gdf(gdf)
 
         for i in range(len(random_samples)):
+
             row_gdf = random_samples.iloc[i:i+1]
 
-            print(row_gdf)
+
+            row_gdf_series = row_gdf.iloc[0]
+
+            # creating image basefolder:
+            img_folderpath = os.path.join(outfolderpath, territory, row_gdf_series.id)
+
+            # generating folders for detections:
+            detections_folderpath = os.path.join(img_folderpath, 'detections')
+            binary_masks_folderpath = os.path.join(img_folderpath, 'binary_masks')
+
+            create_folderlist([img_folderpath,detections_folderpath, binary_masks_folderpath])
+
+            # saving, and loading image:
+            image_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.png')
+            download_mapillary_image(row_gdf_series.thumb_original_url, image_path, cooldown=0.1)
+            image_pil = Image.open(image_path).convert("RGB")
+
+            # saving metadata:
+            img_metadata_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.geojson')
+            row_gdf.to_file(img_metadata_path)
+            detections_metadata_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.csv')
+
+
+
+            with open(detections_metadata_path, 'w') as f:
+                f.write('original_class,labeled_class,visited,index,logit,box\n')
+
+                for prompt in random.sample(classes_list, PROMPTED_CLASSES):
+
+                    masks, boxes, phrases, logits = model.predict(image_pil, prompt)
+
+                    if logits.tolist():
+                        for i in range (len(logits)):
+                            # print(masks[i])
+                            print(tensor_to_string(boxes[i]))
+                            # print(phrases[i])
+                            print(logits[i].tolist())
+
+                            outpath = os.path.join(outfolderpath, territory, row_gdf_series.id, f'{row_gdf_series.id}_{prompt}.png')
+
+                            image_array = np.asarray(image_pil)
+                            image = draw_image_v2(image_array, masks, boxes, phrases)
+                            image = Image.fromarray(np.uint8(image)).convert("RGB")
+                            image.save(outpath)
+
 
 
 
