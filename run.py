@@ -50,7 +50,7 @@ def main():
                 print('empty dataframe, trying again...')
 
         # pick a random row in the gdf:
-        random_samples = random_samples_in_gdf(gdf)
+        random_samples = random_samples_in_gdf(gdf,N_SAMPLES)
 
         for i in range(len(random_samples)):
 
@@ -71,37 +71,44 @@ def main():
             # saving, and loading image:
             image_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.png')
             download_mapillary_image(row_gdf_series.thumb_original_url, image_path, cooldown=0.1)
-            image_pil = Image.open(image_path).convert("RGB")
 
-            # saving metadata:
-            img_metadata_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.geojson')
-            row_gdf.to_file(img_metadata_path)
-            detections_metadata_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.csv')
+            if os.path.exists(image_path):
+                image_pil = Image.open(image_path).convert("RGB")
 
-
-
-            with open(detections_metadata_path, 'w') as f:
-                f.write('original_class,labeled_class,visited,index,logit,box\n')
-
-                for prompt in random.sample(classes_list, PROMPTED_CLASSES):
-
-                    masks, boxes, phrases, logits = model.predict(image_pil, prompt)
-
-                    if logits.tolist():
-                        for i in range (len(logits)):
-                            # print(masks[i])
-                            print(tensor_to_string(boxes[i]))
-                            # print(phrases[i])
-                            print(logits[i].tolist())
-
-                            outpath = os.path.join(outfolderpath, territory, row_gdf_series.id, f'{row_gdf_series.id}_{prompt}.png')
-
-                            image_array = np.asarray(image_pil)
-                            image = draw_image_v2(image_array, masks, boxes, phrases)
-                            image = Image.fromarray(np.uint8(image)).convert("RGB")
-                            image.save(outpath)
+                # saving metadata:
+                img_metadata_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.geojson')
+                row_gdf.to_file(img_metadata_path)
+                detections_metadata_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.csv')
 
 
+
+                with open(detections_metadata_path, 'w') as f:
+                    f.write('original_class,labeled_class,visited,index,logit,box,comment\n')
+
+                    for prompt in random.sample(classes_list, PROMPTED_CLASSES):
+
+                        masks, boxes, phrases, logits = model.predict(image_pil, prompt)
+
+                        if logits.tolist():
+                            # folders for prompt detections:
+                            prompt_name = slugify(prompt)
+                            prompt_folderpath = os.path.join(detections_folderpath, prompt_name)
+                            prompt_binary_masks_folderpath = os.path.join(binary_masks_folderpath, prompt_name)
+                            create_folderlist([prompt_folderpath, prompt_binary_masks_folderpath])
+
+                            for i in range (len(logits)):
+                                detection_box = tensor_to_string(boxes[i])
+                                logit = logits[i].tolist()
+
+                                f.write(f'{prompt},,False,{i},{detection_box},{logit},\n')
+
+                                outpath = os.path.join(prompt_folderpath, f'{row_gdf_series.id}_{i}.png')
+
+                                write_detection_img(image_pil, masks[i], (), (), outpath)
+
+                                outpath_binary = os.path.join(prompt_binary_masks_folderpath, f'{row_gdf_series.id}_{i}.png')
+
+                                write_detection_img(image_pil, masks[i], (), (), outpath_binary, binary=True)
 
 
 if __name__ == '__main__':

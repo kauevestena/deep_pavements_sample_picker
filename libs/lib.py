@@ -5,7 +5,6 @@ import geopandas as gpd
 import requests
 import os
 import json
-import numpy as np
 from shapely.geometry import Point, box
 from math import cos, pi
 import urllib

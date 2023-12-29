@@ -4,6 +4,7 @@ from PIL import Image
 import torch
 from torchvision.utils import draw_bounding_boxes
 from torchvision.utils import draw_segmentation_masks
+import numpy as np
 
 sys.path.append(lang_sam_path)
 
@@ -23,4 +24,16 @@ def draw_image_v2(image, masks, boxes, labels, alpha=0.3,draw_bboxes=False):
     if len(masks) > 0:
         image = draw_segmentation_masks(image, masks=masks, colors=['white'] * len(masks), alpha=alpha)
     return image.numpy().transpose(1, 2, 0)
+
+
+def write_detection_img(image_pil, masks, boxes, phrases, outpath,alpha=0.3,binary=False):
+    image_array = np.asarray(image_pil)
+
+    if binary:
+        image_array = np.zeros_like(image_array)
+        alpha = 1
+
+    image = draw_image_v2(image_array, masks, boxes, phrases,alpha=alpha)
+    image = Image.fromarray(np.uint8(image)).convert("RGB")
+    image.save(outpath)
 
