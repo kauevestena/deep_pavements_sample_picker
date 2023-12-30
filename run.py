@@ -28,87 +28,93 @@ def main():
  
 
     for territory in tqdm(infinite_circular_iterator(territory_list)):
-        print(territory,'turn now...')
+        try:
+            print(territory,'turn now...')
 
-        terr_name = slugify(territory)
-        territory_folderpath = os.path.join(outfolderpath, terr_name)
+            terr_name = slugify(territory)
+            territory_folderpath = os.path.join(outfolderpath, terr_name)
 
-        polygon_gdf = gdfs_dict[terr_name]
+            polygon_gdf = gdfs_dict[terr_name]
 
-        while True:
+            while True:
 
-            query_bbox = random_tile_bbox_in_gdf(polygon_gdf,as_list=True)
+                query_bbox = random_tile_bbox_in_gdf(polygon_gdf,as_list=True)
 
-            mapillary_dict = get_mapillary_images_metadata(*query_bbox)
+                mapillary_dict = get_mapillary_images_metadata(*query_bbox)
 
-            gdf = mapillary_data_to_gdf(mapillary_dict)
+                gdf = mapillary_data_to_gdf(mapillary_dict)
 
-            if not gdf.empty:
-                print('sucessfull with',len(gdf),'images')
-                break
-            else:
-                print('empty dataframe, trying again...')
+                if not gdf.empty:
+                    print('sucessfull with',len(gdf),'images')
+                    break
+                else:
+                    print('empty dataframe, trying again...')
 
-        # pick a random row in the gdf:
-        random_samples = random_samples_in_gdf(gdf,N_SAMPLES)
+            # pick a random row in the gdf:
+            random_samples = random_samples_in_gdf(gdf,N_SAMPLES)
 
-        for i in range(len(random_samples)):
+            for i in range(len(random_samples)):
 
-            row_gdf = random_samples.iloc[i:i+1]
-
-
-            row_gdf_series = row_gdf.iloc[0]
-
-            # creating image basefolder:
-            img_folderpath = os.path.join(outfolderpath, terr_name, row_gdf_series.id)
-
-            # generating folders for detections:
-            detections_folderpath = os.path.join(img_folderpath, 'detections')
-            binary_masks_folderpath = os.path.join(img_folderpath, 'binary_masks')
-
-            create_folderlist([img_folderpath,detections_folderpath, binary_masks_folderpath])
-
-            # saving, and loading image:
-            image_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.png')
-            download_mapillary_image(row_gdf_series.thumb_original_url, image_path, cooldown=0.1)
-
-            if os.path.exists(image_path):
-                image_pil = Image.open(image_path).convert("RGB")
-
-                # saving metadata:
-                img_metadata_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.geojson')
-                selected_columns_to_str(row_gdf) # avoiding that fiona error
-                row_gdf.to_file(img_metadata_path)
-                detections_metadata_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.csv')
+                row_gdf = random_samples.iloc[i:i+1]
 
 
-                with open(detections_metadata_path, 'w') as f:
-                    f.write('original_class,labeled_class,visited,index,logit,box,comment\n')
+                row_gdf_series = row_gdf.iloc[0]
 
-                    for prompt in random.sample(classes_list, PROMPTED_CLASSES):
+                # creating image basefolder:
+                img_folderpath = os.path.join(outfolderpath, terr_name, row_gdf_series.id)
 
-                        masks, boxes, phrases, logits = model.predict(image_pil, prompt)
+                # generating folders for detections:
+                detections_folderpath = os.path.join(img_folderpath, 'detections')
+                binary_masks_folderpath = os.path.join(img_folderpath, 'binary_masks')
 
-                        if logits.tolist():
-                            # folders for prompt detections:
-                            prompt_name = slugify(prompt)
-                            prompt_folderpath = os.path.join(detections_folderpath, prompt_name)
-                            prompt_binary_masks_folderpath = os.path.join(binary_masks_folderpath, prompt_name)
-                            create_folderlist([prompt_folderpath, prompt_binary_masks_folderpath])
+                create_folderlist([img_folderpath,detections_folderpath, binary_masks_folderpath])
 
-                            for i in range (len(logits)):
-                                detection_box = tensor_to_string(boxes[i])
-                                logit = logits[i].tolist()
+                # saving, and loading image:
+                image_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.png')
+                download_mapillary_image(row_gdf_series.thumb_original_url, image_path, cooldown=0.1)
 
-                                f.write(f'{prompt},,False,{i},{detection_box},{logit},\n')
+                if os.path.exists(image_path):
+                    image_pil = Image.open(image_path).convert("RGB")
 
-                                outpath = os.path.join(prompt_folderpath, f'{row_gdf_series.id}_{i}.png')
+                    # saving metadata:
+                    img_metadata_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.geojson')
+                    selected_columns_to_str(row_gdf) # avoiding that fiona error
+                    row_gdf.to_file(img_metadata_path)
+                    detections_metadata_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.csv')
 
-                                write_detection_img(image_pil, masks[i], (), (), outpath)
 
-                                outpath_binary = os.path.join(prompt_binary_masks_folderpath, f'{row_gdf_series.id}_{i}.png')
+                    with open(detections_metadata_path, 'w') as f:
+                        f.write('original_class,labeled_class,visited,index,logit,box,comment\n')
 
-                                write_detection_img(image_pil, masks[i], (), (), outpath_binary, binary=True)
+                        for prompt in random.sample(classes_list, PROMPTED_CLASSES):
+
+                            masks, boxes, phrases, logits = model.predict(image_pil, prompt)
+
+                            if logits.tolist():
+                                # folders for prompt detections:
+                                prompt_name = slugify(prompt)
+                                prompt_folderpath = os.path.join(detections_folderpath, prompt_name)
+                                prompt_binary_masks_folderpath = os.path.join(binary_masks_folderpath, prompt_name)
+                                create_folderlist([prompt_folderpath, prompt_binary_masks_folderpath])
+
+                                for i in range (len(logits)):
+                                    detection_box = tensor_to_string(boxes[i])
+                                    logit = logits[i].tolist()
+
+                                    f.write(f'{prompt},,False,{i},{detection_box},{logit},\n')
+
+                                    outpath = os.path.join(prompt_folderpath, f'{row_gdf_series.id}_{i}.png')
+
+                                    write_detection_img(image_pil, masks[i], (), (), outpath)
+
+                                    outpath_binary = os.path.join(prompt_binary_masks_folderpath, f'{row_gdf_series.id}_{i}.png')
+
+                                    write_detection_img(image_pil, masks[i], (), (), outpath_binary, binary=True)
+        except Exception as e:
+            print(e)
+            if os.path.exists(img_folderpath):
+                print(f'removing {img_folderpath}')
+                rmtree(img_folderpath)
 
 
 if __name__ == '__main__':

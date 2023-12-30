@@ -14,6 +14,7 @@ import mercantile
 from tqdm import tqdm
 from libs.lang_sam_importer import *
 import random
+from shutil import rmtree
 
 def create_dir_if_not_exists(path):
     if not os.path.exists(path):
