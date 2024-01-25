@@ -2,8 +2,6 @@
 from libs.lib import *
 
 # from tqdm import tqdm
-
-
 def get_mapillary_token():
     with open('configs/mapillary_token', 'r') as f:
         return f.readline()
@@ -11,7 +9,7 @@ def get_mapillary_token():
 # right after the function definition
 MAPPILARY_TOKEN = get_mapillary_token()
 
-def get_mapillary_images_metadata(minLon, minLat, maxLon, maxLat, token=MAPPILARY_TOKEN,outpath=None):
+def get_mapillary_images_metadata(minLon, minLat, maxLon, maxLat, token=MAPPILARY_TOKEN,outpath=None,limit=100):
     """
     Request images from Mapillary API given a bbox
 
@@ -28,7 +26,7 @@ def get_mapillary_images_metadata(minLon, minLat, maxLon, maxLat, token=MAPPILAR
     url = "https://graph.mapillary.com/images"
     params = {
         "bbox": f"{minLon},{minLat},{maxLon},{maxLat}",
-        'limit': 5000,
+        'limit': 50,
         "access_token": token,
         "fields": ",".join([
             "altitude", 

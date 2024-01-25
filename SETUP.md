@@ -17,11 +17,11 @@ If it isn't created, the building (check it below) process will fail.
 
 first buid:
 
-    docker build --tag 'deep_pavements' .
+    docker build --tag 'deep_pavements_sample_picker' .
 
 then run:
 
-    docker run --name running_deep_pavements --mount type=bind,source=D:\segmentation_img_data,target=/home/data --gpus all -it 'deep_pavements' 
+    docker run --name running_deep_pavements_sp -v D:\segmentation_img_data:/workspace/data --gpus all -it 'deep_pavements_sample_picker' 
 
 replace "D:\semantic_segmentation_data" with the desired path for mounting a volume were the outputs shall be generated. If you wanna more than one running container, you can remove "--name running_deep_pavements". 
 
@@ -33,6 +33,6 @@ Inside the container:
 
     python run.py
 
-Outside shall be: 
+Outside it shall be: 
 
     docker run running_deep_pavements python run.py
