@@ -1,6 +1,5 @@
 
-# to comply with the tested version (at 24/12/2023):
-# FROM pytorch@sha256:3387e598cb94fc248d82e712a65b10931a990cea3a2e76362ca30d135f565de4
+# First working version at 24/12/2023:
 FROM pytorch/pytorch:latest
 
 # prevent apt from hanging
