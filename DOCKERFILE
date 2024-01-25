@@ -30,6 +30,7 @@ WORKDIR $REPODIR
 RUN pip install -r requirements.txt
 COPY mapillary_token configs/mapillary_token
 RUN build_tests\test_openclip.py
+RUN build_tests\test_openclip.py
 
 
 
