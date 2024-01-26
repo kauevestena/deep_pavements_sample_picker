@@ -2,7 +2,7 @@
 
 ZOOM_LEVEL = 17
 
-N_SAMPLES = 1
+# N_SAMPLES = 1
 
 outfolderpath = '../data'
 lang_sam_path = '../lang-segment-anything/lang_sam'
