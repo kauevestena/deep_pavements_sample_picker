@@ -44,6 +44,9 @@ def infinite_circular_iterator(iterable):
         for x in iterable:
             yield x
 
+def infinite_generator():
+  while True:
+    yield
 
 def slugify(value, allow_unicode=True):
     import unicodedata
@@ -179,7 +182,7 @@ def check_type_by_first_valid(input_iterable):
             return type(item)
         
 
-def random_samples_in_gdf(gdf,num_samples=N_SAMPLES):
+def random_samples_in_gdf(gdf,num_samples=1):
     if num_samples > len(gdf):
         num_samples = len(gdf)
 
@@ -191,3 +194,107 @@ def tensor_to_string(tensor, delimiter=' '):
 def create_folderlist(folderpath_list):
     for folderpath in folderpath_list:
         create_dir_if_not_exists(folderpath)
+
+def get_random_territory(return_path=False):
+    cities = [territory for territory in os.listdir(ROOT_OUTFOLDERPATH)]
+    if return_path:
+        return os.path.join(ROOT_OUTFOLDERPATH, random.choice(cities))
+    else:
+        return random.choice(cities)
+
+def get_random_sample(return_path=False,territory=None):
+    if not territory:
+        territory = get_random_territory()
+    
+    sample_folderpath = os.path.join(ROOT_OUTFOLDERPATH, territory)
+
+    if return_path:
+        return os.path.join(sample_folderpath, random.choice(os.listdir(sample_folderpath)))
+    else:
+        return random.choice(os.listdir(sample_folderpath))
+    
+def read_binary_img(img_path):
+    return Image.open(img_path).convert("1")
+
+def apply_binary_mask(img_or_path, mask_or_path, outpath):
+    if not isinstance(img_or_path, Image.Image):
+        img = Image.open(img_or_path).convert('RGB')
+    else:
+        img = img_or_path
+    if not isinstance(mask_or_path, Image.Image):
+        mask = Image.open(mask_or_path).convert('1')
+    else:
+        mask = mask_or_path
+
+    blank = img.point(lambda _: 0)  
+
+    img_final = Image.composite(img, blank, mask)
+    img_final.save(outpath)
+
+class sample_handler:
+    def __init__(self,territory=None,sample=None,extension='.png'):
+        self.extension = extension
+
+        if not territory:
+            territory = get_random_territory()
+           
+        self.territory = territory
+        self.territory_folderpath = os.path.join(ROOT_OUTFOLDERPATH, territory)
+
+        if not sample:
+            sample = get_random_sample(territory=self.territory)
+
+        self.sample = sample
+
+        self.sample_folderpath = os.path.join(ROOT_OUTFOLDERPATH, territory, sample)
+
+        self.detections_path = os.path.join(self.sample_folderpath, 'detections')
+        self.binary_masks_path = os.path.join(self.sample_folderpath, 'binary_masks')
+        self.clipped_detections_path = os.path.join(self.sample_folderpath, 'clipped_detections')
+
+        self.img_path = os.path.join(self.sample_folderpath, sample+extension)
+
+        self.detections = os.listdir(self.detections_path)
+        # self.binary_masks = os.listdir(self.binary_masks_path)
+        # self.clipped_detections = os.listdir(self.clipped_detections_path)
+
+        self.metadata_path = os.path.join(self.sample_folderpath, sample+'.geojson')
+        self.detections_metadata_path = os.path.join(self.sample_folderpath, sample+'.csv')
+
+    def get_img(self):
+        if os.path.exists(self.img_path):
+            return Image.open(self.img_path).convert("RGB")
+    
+    def get_metadata(self):
+        if os.path.exists(self.metadata_path):
+            return gpd.read_file(self.metadata_path)
+        
+    def get_detections_metadata(self):
+        if os.path.exists(self.detections_metadata_path):
+            return pd.read_csv(self.detections_metadata_path)
+        
+    def check_if_detection_exist(self,name='asphalt'):
+        return name in self.detections
+    
+    def get_first_detection_binary_path(self,name='asphalt'):
+        if self.check_if_detection_exist(name):
+            return os.path.join(self.binary_masks_path,name, f'{self.sample}_0{self.extension}')
+        
+    def generate_clips(self):
+        create_dir_if_not_exists(self.clipped_detections_path)
+
+        img = self.get_img()
+
+        for detection in tqdm(self.detections):
+            detection_binary_masks_path = os.path.join(self.binary_masks_path,detection)
+
+            for imgname in tqdm(os.listdir(detection_binary_masks_path)):
+
+                binary_maskpath = os.path.join(detection_binary_masks_path,imgname)
+                out_folderpath = os.path.join(self.clipped_detections_path, detection)
+                create_dir_if_not_exists(out_folderpath)
+                outpath = os.path.join(out_folderpath, imgname)
+
+                if not os.path.exists(outpath):
+                    apply_binary_mask(img, binary_maskpath, outpath)
+        

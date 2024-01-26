@@ -16,7 +16,9 @@ def draw_image_v2(image, masks, boxes, labels, alpha=0.3,colors=['white'],draw_b
 
     '''
 
-    # image.flags.writeable = True
+    image = image.copy()
+    image.flags.writeable = True
+
     image = torch.from_numpy(image).permute(2, 0, 1)
     if len(boxes) > 0 and draw_bboxes:
         image = draw_bounding_boxes(image, boxes, colors=['red'] * len(boxes), labels=labels, width=2)

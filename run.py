@@ -16,7 +16,7 @@ def main():
     for territory in territory_list:
         terr_name = slugify(territory)
 
-        territory_folderpath = os.path.join(outfolderpath, terr_name)
+        territory_folderpath = os.path.join(ROOT_OUTFOLDERPATH, terr_name)
         create_dir_if_not_exists(territory_folderpath)
 
         # getting territory as a polygon using Nominatim OSM API:
@@ -32,7 +32,7 @@ def main():
             print(territory,'turn now...')
 
             terr_name = slugify(territory)
-            territory_folderpath = os.path.join(outfolderpath, terr_name)
+            territory_folderpath = os.path.join(ROOT_OUTFOLDERPATH, terr_name)
 
             polygon_gdf = gdfs_dict[terr_name]
 
@@ -78,7 +78,7 @@ def main():
                 row_gdf_series = row_gdf.iloc[0]
 
                 # creating image basefolder:
-                img_folderpath = os.path.join(outfolderpath, terr_name, row_gdf_series.id)
+                img_folderpath = os.path.join(ROOT_OUTFOLDERPATH, terr_name, row_gdf_series.id)
 
                 # generating folders for detections:
                 detections_folderpath = os.path.join(img_folderpath, 'detections')

@@ -4,7 +4,7 @@ ZOOM_LEVEL = 17
 
 # N_SAMPLES = 1
 
-outfolderpath = '../data'
+ROOT_OUTFOLDERPATH = '../data'
 lang_sam_path = '../lang-segment-anything/lang_sam'
 terr_polygons_folder = 'terr_polygons'
 
