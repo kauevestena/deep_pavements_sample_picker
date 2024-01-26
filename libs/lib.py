@@ -129,8 +129,8 @@ def random_point_in_bbox(input_bbox,as_point=False):
         tuple: A tuple containing the latitude and longitude of the randomly generated point.
     """
     min_lon, min_lat, max_lon, max_lat = input_bbox
-    lat = min_lat + (max_lat - min_lat) * np.random.random()
-    lon = min_lon + (max_lon - min_lon) * np.random.random()
+    lat = min_lat + (max_lat - min_lat) * np.random.random_sample()
+    lon = min_lon + (max_lon - min_lon) * np.random.random_sample()
 
     if as_point:
         return Point(lon, lat)

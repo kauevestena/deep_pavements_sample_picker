@@ -50,8 +50,25 @@ def main():
                 else:
                     print('empty dataframe, trying again...')
 
+            # we picked up a single image, but for now we will be working only with perspective images
+            # TODO: work with panoramic images, maybe transforming into perspective ones
+                    
+            perspective_found = False
             # pick a random row in the gdf:
-            random_samples = random_samples_in_gdf(gdf,N_SAMPLES)
+            for i in range(SAMPLES_MAPILLARY):
+                random_samples = random_samples_in_gdf(gdf,1)
+
+                if "camera_type" in random_samples.columns:
+                    if random_samples['camera_type'] == "perspective":
+                        perspective_found = True
+                        break
+                else:
+                    break
+
+
+            if not perspective_found:
+                # if there's no perspective ones we skip to the next random sample:
+                continue
 
             for i in range(len(random_samples)):
 
@@ -66,8 +83,9 @@ def main():
                 # generating folders for detections:
                 detections_folderpath = os.path.join(img_folderpath, 'detections')
                 binary_masks_folderpath = os.path.join(img_folderpath, 'binary_masks')
+                clipped_detections_folderpath = os.path.join(img_folderpath, 'clipped_detections')
 
-                create_folderlist([img_folderpath,detections_folderpath, binary_masks_folderpath])
+                create_folderlist([img_folderpath,detections_folderpath, binary_masks_folderpath,clipped_detections_folderpath])
 
                 # saving, and loading image:
                 image_path = os.path.join(img_folderpath, f'{row_gdf_series.id}.png')
@@ -86,30 +104,36 @@ def main():
                     with open(detections_metadata_path, 'w') as f:
                         f.write('original_class,labeled_class,visited,index,logit,box,comment\n')
 
-                        for prompt in random.sample(classes_list, PROMPTED_CLASSES):
+                        with torch.no_grad():
+                            for prompt in classes_list:
 
-                            masks, boxes, phrases, logits = model.predict(image_pil, prompt)
+                                masks, boxes, phrases, logits = model.predict(image_pil, prompt)
 
-                            if logits.tolist():
-                                # folders for prompt detections:
-                                prompt_name = slugify(prompt)
-                                prompt_folderpath = os.path.join(detections_folderpath, prompt_name)
-                                prompt_binary_masks_folderpath = os.path.join(binary_masks_folderpath, prompt_name)
-                                create_folderlist([prompt_folderpath, prompt_binary_masks_folderpath])
+                                if logits.tolist():
+                                    # folders for prompt detections:
+                                    prompt_name = slugify(prompt)
+                                    prompt_folderpath = os.path.join(detections_folderpath, prompt_name)
+                                    prompt_binary_masks_folderpath = os.path.join(binary_masks_folderpath, prompt_name)
+                                    create_folderlist([prompt_folderpath, prompt_binary_masks_folderpath])
 
-                                for i in range (len(logits)):
-                                    detection_box = tensor_to_string(boxes[i])
-                                    logit = logits[i].tolist()
+                                    for i in range (len(logits)):
+                                        detection_box = tensor_to_string(boxes[i])
+                                        logit = logits[i].tolist()
 
-                                    f.write(f'{prompt},,False,{i},{detection_box},{logit},\n')
+                                        f.write(f'{prompt},,False,{i},{detection_box},{logit},\n')
 
-                                    outpath = os.path.join(prompt_folderpath, f'{row_gdf_series.id}_{i}.png')
+                                        outpath = os.path.join(prompt_folderpath, f'{row_gdf_series.id}_{i}.png')
 
-                                    write_detection_img(image_pil, masks[i], (), (), outpath)
+                                        write_detection_img(image_pil, masks[i], (), (), outpath)
 
-                                    outpath_binary = os.path.join(prompt_binary_masks_folderpath, f'{row_gdf_series.id}_{i}.png')
+                                        outpath_binary = os.path.join(prompt_binary_masks_folderpath, f'{row_gdf_series.id}_{i}.png')
 
-                                    write_detection_img(image_pil, masks[i], (), (), outpath_binary, binary=True)
+                                        write_detection_img(image_pil, masks[i], (), (), outpath_binary, binary=True)
+
+                                        outpath_clipped = os.path.join(clipped_detections_folderpath, f'{row_gdf_series.id}_{i}.png')
+
+                                        write_detection_img(image_pil, masks[i], (), (), outpath_clipped, clip=True)
+
         except Exception as e:
             print(e)
             if os.path.exists(img_folderpath):

@@ -13,7 +13,7 @@ import open_clip
 model, _, preprocess = open_clip.create_model_and_transforms(OPEN_CLIP_MODEL, pretrained=OPEN_CLIP_PRETAINED_DATASED)
 tokenizer = open_clip.get_tokenizer(OPEN_CLIP_MODEL)
 
-image = preprocess(Image.open('configs\small_sample.png')).unsqueeze(0)
+image = preprocess(Image.open('build_tests/small_sample.png')).unsqueeze(0)
 text = tokenizer(["asphalt", "sand", "grass"])
 
 with torch.no_grad(), torch.cuda.amp.autocast():

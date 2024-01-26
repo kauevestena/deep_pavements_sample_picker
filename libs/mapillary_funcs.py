@@ -9,7 +9,7 @@ def get_mapillary_token():
 # right after the function definition
 MAPPILARY_TOKEN = get_mapillary_token()
 
-def get_mapillary_images_metadata(minLon, minLat, maxLon, maxLat, token=MAPPILARY_TOKEN,outpath=None,limit=100):
+def get_mapillary_images_metadata(minLon, minLat, maxLon, maxLat, token=MAPPILARY_TOKEN,outpath=None,limit=SAMPLES_MAPILLARY):
     """
     Request images from Mapillary API given a bbox
 
