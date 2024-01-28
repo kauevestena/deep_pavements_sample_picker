@@ -17,6 +17,7 @@ import random
 from shutil import rmtree
 import clip
 import open_clip
+import tempfile
 
 def create_dir_if_not_exists(path):
     if not os.path.exists(path):
@@ -374,10 +375,17 @@ class sample_handler:
                     apply_binary_mask(img, binary_maskpath, outpath)
 
 def append_to_file(filepath,content=''):
-    with open(filepath,'a') as f:
+    with open(filepath,'a',encoding='utf-8') as f:
+        f.write(content)
+
+def write_to_file(filepath,content='',mode='w'):
+    with open(filepath,mode,encoding='utf-8') as f:
         f.write(content)
 
 # create needed paths:
 for pathname in (ROOT_OUTFOLDERPATH, REPORTS_PATH):
     create_dir_if_not_exists(pathname)
 
+def simple_read(filepath):
+    with open(filepath,'r',encoding='utf-8') as f:
+        return f.read()
