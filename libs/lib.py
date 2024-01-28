@@ -15,6 +15,8 @@ from tqdm import tqdm
 from libs.lang_sam_importer import *
 import random
 from shutil import rmtree
+import clip
+import open_clip
 
 def create_dir_if_not_exists(path):
     if not os.path.exists(path):
@@ -231,7 +233,25 @@ def apply_binary_mask(img_or_path, mask_or_path, outpath):
     img_final = Image.composite(img, blank, mask)
     img_final.save(outpath)
 
+def resize_image(img, percentage):
+
+  # Get the original size
+  width, height = img.size
+
+  # Calculate the new size as a percentage of the original
+  new_width = int(width * percentage / 100)
+  new_height = int(height * percentage / 100)
+  new_size = (new_width, new_height)
+
+  # Resize the image using the new size and the antialias filter
+  new_img = img.copy().resize(new_size)
+
+  # Return the resized image
+  return new_img
+
 class sample_handler:
+    metadata = None
+
     def __init__(self,territory=None,sample=None,extension='.png'):
         self.extension = extension
 
@@ -246,17 +266,18 @@ class sample_handler:
 
         self.sample = sample
 
+        self.mapillary_id = sample
+
         self.sample_folderpath = os.path.join(ROOT_OUTFOLDERPATH, territory, sample)
 
         self.detections_path = os.path.join(self.sample_folderpath, 'detections')
         self.binary_masks_path = os.path.join(self.sample_folderpath, 'binary_masks')
         self.clipped_detections_path = os.path.join(self.sample_folderpath, 'clipped_detections')
+        create_dir_if_not_exists(self.clipped_detections_path)
 
         self.img_path = os.path.join(self.sample_folderpath, sample+extension)
 
         self.detections = os.listdir(self.detections_path)
-        # self.binary_masks = os.listdir(self.binary_masks_path)
-        # self.clipped_detections = os.listdir(self.clipped_detections_path)
 
         self.metadata_path = os.path.join(self.sample_folderpath, sample+'.geojson')
         self.detections_metadata_path = os.path.join(self.sample_folderpath, sample+'.csv')
@@ -266,8 +287,21 @@ class sample_handler:
             return Image.open(self.img_path).convert("RGB")
     
     def get_metadata(self):
-        if os.path.exists(self.metadata_path):
-            return gpd.read_file(self.metadata_path)
+        if not self.metadata:
+            if os.path.exists(self.metadata_path):
+                self.metadata = gpd.read_file(self.metadata_path)
+                return self.metadata
+        
+    def check_perspective_camera(self):
+        self.get_metadata() # load metadata if not already loaded
+
+        if self.metadata is not None:
+            if not self.metadata.empty:
+                if 'camera_type' in self.metadata.columns:
+                    if 'perspective' in self.metadata['camera_type'].values:
+                        return True
+                
+        return False
         
     def get_detections_metadata(self):
         if os.path.exists(self.detections_metadata_path):
@@ -276,12 +310,53 @@ class sample_handler:
     def check_if_detection_exist(self,name='asphalt'):
         return name in self.detections
     
+    def get_random_detection_category(self):
+        if self.detections:
+            return random.choice(self.detections)
+    
     def get_first_detection_binary_path(self,name='asphalt'):
         if self.check_if_detection_exist(name):
             return os.path.join(self.binary_masks_path,name, f'{self.sample}_0{self.extension}')
         
+    def get_detection_binary_masks_path(self,name='asphalt'):
+        if self.check_if_detection_exist(name):
+            return os.path.join(self.binary_masks_path,name)
+        
+    def get_random_binary_mask_list(self,name=None):
+        if not name:
+            name = self.get_random_detection_category()
+        
+        if self.check_if_detection_exist(name):
+            class_rootpath = os.path.join(self.binary_masks_path,name)
+
+            return os.listdir(class_rootpath)
+    
+    def get_random_binary_mask(self,name=None,return_path=False):
+        if not name:
+            name = self.get_random_detection_category()
+        
+        if self.check_if_detection_exist(name):
+            return random.choice(self.get_random_binary_mask_list(name))
+    
+    def get_single_clip(self,category=None,binary_mask=None):
+        if not category:
+            category = self.get_random_detection_category()
+
+        if self.check_if_detection_exist(category):
+            if not binary_mask:
+                binary_mask = self.get_random_binary_mask(category)
+
+            clip_category_path = os.path.join(self.clipped_detections_path,category)
+            clip_path = os.path.join(clip_category_path,binary_mask)
+
+            if not os.path.exists(clip_path):
+                create_dir_if_not_exists(clip_category_path)
+                binary_mask_path = os.path.join(self.binary_masks_path,category,binary_mask)
+                apply_binary_mask(self.img_path, binary_mask_path, clip_path)
+
+            return clip_path
+
     def generate_clips(self):
-        create_dir_if_not_exists(self.clipped_detections_path)
 
         img = self.get_img()
 
@@ -297,4 +372,12 @@ class sample_handler:
 
                 if not os.path.exists(outpath):
                     apply_binary_mask(img, binary_maskpath, outpath)
-        
+
+def append_to_file(filepath,content=''):
+    with open(filepath,'a') as f:
+        f.write(content)
+
+# create needed paths:
+for pathname in (ROOT_OUTFOLDERPATH, REPORTS_PATH):
+    create_dir_if_not_exists(pathname)
+

@@ -4,7 +4,13 @@ ZOOM_LEVEL = 17
 
 # N_SAMPLES = 1
 
-ROOT_OUTFOLDERPATH = '../data'
+DEVICE = 'cuda'
+
+ROOTPATH = '../data'
+
+REPORTS_PATH = '../data/reports'
+
+ROOT_OUTFOLDERPATH = '../data/samples'
 lang_sam_path = '../lang-segment-anything/lang_sam'
 terr_polygons_folder = 'terr_polygons'
 

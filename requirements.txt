@@ -6,3 +6,4 @@ requests
 tqdm
 Pillow
 open_clip_torch
+gpustat
