@@ -1,7 +1,7 @@
 from quality_funcs import *
 
 open_clip_model_list = [
-    # ("ViT-H-14-378-quickgelu","dfn5b"),
+    ("ViT-H-14-378-quickgelu","dfn5b"),
     ("EVA02-E-14-plus","laion2b_s9b_b144k"),
     ("ViT-bigG-14","laion2b_s39b_b160k"),
     ("ViT-bigG-14-CLIPA-336","datacomp1b"),
@@ -29,15 +29,17 @@ for model_info in tqdm(open_clip_model_list):
 
                     img = Image.open(clip_img_path).convert('RGB')
 
-                    img_50 = resize_image(img, 50)
-
-                    img_25 = resize_image(img, 25)
+                    if TEST_REDUCED_SIZE:
+                        img_50 = resize_image(img, 50)
+                        img_25 = resize_image(img, 25)
 
                     imgs = {
                         'orig' : img,
-                        'half' : img_50,
-                        'quarter' : img_25
                     }
+
+                    if TEST_REDUCED_SIZE:
+                        imgs['half'] = img_50
+                        imgs['quarter'] = img_25
 
                     for level, n_img in imgs.items():
                         all_results = []

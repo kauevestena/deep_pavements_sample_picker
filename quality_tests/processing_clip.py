@@ -12,43 +12,52 @@ for model_name in tqdm(clip_model_list):
 
         for row_tuple in tqdm(chosen_samples_metadata.itertuples(), total=chosen_samples_metadata.shape[0]):
 
-            clip_img_path = row_tuple.sample_path
-            sample_id = clip_img_path.split('/')[-1].split('.')[0]
-            sample_ids.append(sample_id)
+            try:
+                clip_img_path = row_tuple.sample_path
+                sample_id = clip_img_path.split('/')[-1].split('.')[0]
+                sample_ids.append(sample_id)
 
-            final_name = row_tuple.category + '_' + sample_id
+                final_name = row_tuple.category + '_' + sample_id
 
-            img = Image.open(clip_img_path).convert('RGB')
+                img = Image.open(clip_img_path).convert('RGB')
 
-            img_50 = resize_image(img, 50)
+                if TEST_REDUCED_SIZE:
+                    img_50 = resize_image(img, 50)
 
-            img_25 = resize_image(img, 25)
+                    img_25 = resize_image(img, 25)
 
-            imgs = {
-                'orig' : img,
-                'half' : img_50,
-                'quarter' : img_25
-            }
+                imgs = {
+                    'orig' : img,
+                    # 'half' : img_50,
+                    # 'quarter' : img_25
+                }
 
-            for level, n_img in imgs.items():
-                all_results = []
+                if TEST_REDUCED_SIZE:
+                    imgs['half'] = img_50
+                    imgs['quarter'] = img_25
 
-                for voc in tqdm(voc_list):
-                    p_img = preprocess(n_img).unsqueeze(0).to(DEVICE)
-                    text = clip.tokenize(voc).to(DEVICE)
+                for level, n_img in imgs.items():
+                    all_results = []
 
-                    image_features = model.encode_image(p_img)
-                    text_features = model.encode_text(text)
+                    for voc in tqdm(voc_list):
+                        p_img = preprocess(n_img).unsqueeze(0).to(DEVICE)
+                        text = clip.tokenize(voc).to(DEVICE)
 
-                    logits_per_image, logits_per_text = model(p_img, text)
+                        image_features = model.encode_image(p_img)
+                        text_features = model.encode_text(text)
 
-                    probs = logits_per_image.softmax(dim=-1).cpu().numpy().tolist()[0]
+                        logits_per_image, logits_per_text = model(p_img, text)
 
-                    all_results += probs
+                        probs = logits_per_image.softmax(dim=-1).cpu().numpy().tolist()[0]
 
-                content = model_name + ',' + ','.join([str(x) for x in all_results]) + '\n'
+                        all_results += probs
 
-                write_to_raw_report(final_name, level, content)
+                    content = model_name + ',' + ','.join([str(x) for x in all_results]) + '\n'
+
+                    write_to_raw_report(final_name, level, content)
+
+            except Exception as e:
+                print(e)
 
     # clean up
     del model

@@ -7,13 +7,28 @@ import base64
 
 n_samples = 2500
 
+TEST_REDUCED_SIZE = False
+
+# voc1 = ['road','sidewalk']
+# voc2 = ['asphalt','concrete','grass','ground','sett','paving stones','raw cobblestone','gravel','sand']
+# voc3 = [f'{j} {i}' for i in voc1 for j in voc2]
 voc1 = ['road','sidewalk']
-voc2 = ['asphalt','concrete','grass','ground','sett','paving stones','raw cobblestone','gravel','sand']
-voc3 = [f'{j} {i}' for i in voc1 for j in voc2]
 
-voc_list = [voc1,voc2,voc3]
+voc2 = [ 'road', 'sidewalk', 'not a pavement']
+voc3 = [ 'road', 'sidewalk', 'not a path']
+voc3 = [ 'road', 'sidewalk', 'car', 'tree', 'pole', 'building']
 
-all_vocabs = voc1 + voc2 + voc3
+voc4 = ["paved", "unpaved",]
+voc5 = ["asphalt", "concrete", "cobblestone", "block paving", "unpaved"]
+voc6 = ["asphalt", "concrete", "cobblestone", "brick paving", "unpaved"]
+voc7 = ["asphalt", "concrete", "cobblestone", "block paving", 'gravel', "sett", "grass", "dirt"]
+voc7 = ["asphalt", "concrete", "cobblestone", "pavers", "grass", "dirt"]
+voc8 = ["asphalt", "cement", "cobblestone", "block paving", "sett pavement", "grass", "dirt"]
+
+
+
+voc_list = [voc1,voc2,voc3,voc4,voc5,voc6,voc7,voc8]
+all_vocabs = [voc for vocs in voc_list for voc in vocs]
 
 report_header = 'model,' + ','.join(all_vocabs) + '\n'
 
