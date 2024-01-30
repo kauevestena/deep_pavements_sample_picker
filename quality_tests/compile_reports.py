@@ -21,10 +21,11 @@ for raw_report_name in tqdm(os.listdir(default_res_path)):
     img_path, sample_path = get_img_paths(sample_id,category)
 
     if img_path and sample_path:
+        write_html_report(report_basename,img_path,sample_path,all_dfs)
+        
         img_path = adapth_path(img_path)
         sample_path = adapth_path(sample_path)
 
         # writing a markdown report both images and all the tables on it:
         write_markdown_report(report_basename,img_path,sample_path,all_dfs)
 
-        write_html_report(report_basename,img_path,sample_path,all_dfs)

@@ -1,6 +1,6 @@
 # You can select an model from: 
 OPEN_CLIP_MODEL = "ViT-bigG-14"
-OPEN_CLIP_PRETAINED_DATASED =  'laion2b_s39b_b160k'
+OPEN_CLIP_PRETAINED_DATASET =  'laion2b_s39b_b160k'
 
 # SUPERCLASSES (keys) AND SUBCLASSES (values in a list):
 

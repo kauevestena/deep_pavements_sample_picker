@@ -2,6 +2,8 @@ import sys
 sys.path.append('.')
 from libs.mapillary_funcs import *
 import plotly.graph_objects as go
+import io
+import base64
 
 n_samples = 2500
 
@@ -174,6 +176,34 @@ def gen_rep_df_chart(df,title_text,outpath,full_html=False):
     #     f = os.path.join(tmpdir,f'{title_text}.html')
     return fig.write_html(outpath,full_html=full_html)
 
+
+def image_to_base64(image_path: str, return_html: bool = False, new_width: int = 600) -> str:
+    """
+    Read an image, reduce it to the specified pixels width, and transform it to a base64 string or full <img> HTML tag.
+
+    Args:
+    image_path: The path to the input image file.
+    return_html: If True, return the full <img> HTML tag; if False, return the base64 string. Default is False.
+    new_width: The desired width of the image in pixels.
+
+    Returns:
+    The base64 representation of the transformed image, or the full <img> HTML tag.
+    """
+    with Image.open(image_path) as img:
+        width_percent = (new_width / float(img.size[0]))
+        new_height = int((float(img.size[1]) * float(width_percent)))
+        img = img.resize((new_width, new_height))
+        img_byte_array = io.BytesIO()
+        img.save(img_byte_array, format='JPEG')
+        img_byte_array = img_byte_array.getvalue()
+        base64_img = base64.b64encode(img_byte_array).decode('utf-8')
+
+        if return_html:
+            img_tag = f'<img src="data:image/jpeg;base64,{base64_img}">'
+            return img_tag
+        else:
+            return base64_img
+
 def write_html_report(report_basename, img_path, sample_path, all_dfs):
     """
     Generate an HTML report with given information.
@@ -231,10 +261,10 @@ def write_html_report(report_basename, img_path, sample_path, all_dfs):
     <h1>For {report_basename}</h1>
 
     <h1>Original Image</h1>
-    <img src="{img_path}">
+    {image_to_base64(img_path, return_html=True)}
 
-    <h1>Clip Image</h1>
-    <img src="{sample_path}">
+    <h1>Clipped Image</h1>
+    {image_to_base64(sample_path, return_html=True)}
 
     """
 
@@ -244,10 +274,12 @@ def write_html_report(report_basename, img_path, sample_path, all_dfs):
         <h1>{ref[0]}</h1>
         {ref[1].to_html(float_format=float_to_str)}
         """
-        # chart generation:
+    
+    # chart generation:
+    for ref in zip(resolution_levels, all_dfs):
         with tempfile.TemporaryDirectory() as tmpdir:
             temp_path = os.path.join(tmpdir, f'temp.html')
-            fig = gen_rep_df_chart(ref[1], ref[0], temp_path)
+            gen_rep_df_chart(ref[1], ref[0], temp_path)
             content += simple_read(temp_path)
 
     # Complete the HTML content
