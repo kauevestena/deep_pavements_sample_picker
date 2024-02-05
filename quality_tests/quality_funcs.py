@@ -92,6 +92,9 @@ markdown_reports_path = os.path.join(REPORTS_PATH,'markdown_reports')
 
 default_res_path = os.path.join(raw_reports_path,default_resolution)
 
+sample_voc_path = os.path.join(raw_reports_path,list(voc_dict.keys())[0])
+
+vocs_paths = [os.path.join(raw_reports_path,vocname) for vocname in voc_dict]
 resolution_paths = [os.path.join(raw_reports_path,level) for level in resolution_levels]
 
 for dirpath in [raw_reports_path,html_reports_path,markdown_reports_path]:
