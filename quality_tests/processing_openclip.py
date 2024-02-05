@@ -46,7 +46,7 @@ for model_info in tqdm(open_clip_model_list):
 
                         for voc in tqdm(voc_list):
                             p_img = preprocess(n_img).unsqueeze(0).to(DEVICE)
-                            text = clip.tokenize(voc).to(DEVICE)
+                            text = tokenizer(voc).to(DEVICE)
 
                             image_features = model.encode_image(p_img)
                             text_features = model.encode_text(text)

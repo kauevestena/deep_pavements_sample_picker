@@ -4,35 +4,51 @@ from libs.mapillary_funcs import *
 import plotly.graph_objects as go
 import io
 import base64
+import shutil
 
 n_samples = 2500
 
 TEST_REDUCED_SIZE = False
 
-# voc1 = ['road','sidewalk']
-# voc2 = ['asphalt','concrete','grass','ground','sett','paving stones','raw cobblestone','gravel','sand']
-# voc3 = [f'{j} {i}' for i in voc1 for j in voc2]
-voc1 = ['road','sidewalk']
-
-voc2 = [ 'road', 'sidewalk', 'not a pavement']
-voc3 = [ 'road', 'sidewalk', 'not a path']
-voc3 = [ 'road', 'sidewalk', 'car', 'tree', 'pole', 'building']
-
-voc4 = ["paved", "unpaved",]
-voc5 = ["asphalt", "concrete", "cobblestone", "block paving", "unpaved"]
-voc6 = ["asphalt", "concrete", "cobblestone", "brick paving", "unpaved"]
-voc7 = ["asphalt", "concrete", "cobblestone", "block paving", 'gravel', "sett", "grass", "dirt"]
-voc7 = ["asphalt", "concrete", "cobblestone", "pavers", "grass", "dirt"]
-voc8 = ["asphalt", "cement", "cobblestone", "block paving", "sett pavement", "grass", "dirt"]
 
 
+voc_dict = {
+    'voc1' : ['road','sidewalk'],
+    'voc2' : ['road','sidewalk','other'],
 
-voc_list = [voc1,voc2,voc3,voc4,voc5,voc6,voc7,voc8]
+    'voc2b' : [ 'road', 'sidewalk', 'not a pavement'],
+    'voc2c' : [ 'road','path','way','track', 'sidewalk', 'not a pavement'],
+    'voc2d' : [ 'road','path','way','track'],
+    'voc2e' : [ 'road','path','way','track','something else'],
+    'voc3' : [ 'road', 'sidewalk', 'not a path'],
+    'voc4' : [ 'road', 'sidewalk', 'car', 'tree', 'pole', 'building'],
+    'voc4b' : [ 'road', 'sidewalk', 'car', 'tree', 'pole', 'building','other'],
+
+    'voc4c' : ["paved", "unpaved",],
+    'voc5' : ["asphalt", "concrete", "cobblestone", "block paving", "unpaved"],
+    'voc5b' : ["asphalt", "cement", "cobblestone", "block paving", "unpaved"],
+    'voc6' : ['paved','grass','soil','dirt','sand','earth','rocks','gravel','cobblestone'],
+    'voc7' : ["asphalt", "concrete", "cobblestone", "block paving", 'gravel', "sett", "grass", "dirt"],
+    'voc7b' : ["asphalt", "concrete", "cobblestone", "pavers", "grass", "dirt"],
+    'voc8' : ["asphalt", "cement", "cobblestone", "block pavement", "sett pavement", "grass", "dirt"],
+    'voc8b' : ["asphalt", "cement", "cobblestone", "block paving", "sett paving", "grass", "dirt"],
+
+    'voc_smooth1' : ['excellent smoothness','good smoothness','average smoothness','poor smoothness'],
+    'voc_smooth2' : ['excellent smoothness','good smoothness','average smoothness','bad smoothness','horrible smoothness','very_horrible smoothness','horrible smoothness'],
+    'voc_smooth2b' : ['excellent condition','good condition','average condition','bad condition','horrible condition'],
+}
+
+
+voc_list = [voc_dict[key] for key in voc_dict.keys()]
 all_vocabs = [voc for vocs in voc_list for voc in vocs]
 
 report_header = 'model,' + ','.join(all_vocabs) + '\n'
 
 chosen_samples_path = os.path.join(REPORTS_PATH,'chosen_samples.csv')
+
+def reset_raw_reports():
+    shutil.rmtree(raw_reports_path,ignore_errors=True)
+    create_dir_if_not_exists(raw_reports_path)
 
 def get_chosen_samples_metadata():
     if os.path.exists(chosen_samples_path):
@@ -53,6 +69,18 @@ def write_to_raw_report(report_name,level,content):
 
     append_to_file(report_path,content)
 
+def write_to_raw_report_v2(report_name,voc_name,vocabulary,content):
+    voc_path = os.path.join(raw_reports_path,voc_name)
+    create_dir_if_not_exists(voc_path)
+
+    report_path = os.path.join(voc_path,report_name+'.csv')
+
+    header = 'model,' + ','.join(vocabulary) + '\n'
+
+    if not os.path.exists(report_path):
+        append_to_file(report_path,header)
+
+    append_to_file(report_path,content)
 
 resolution_levels = ['orig','half','quarter']
 
