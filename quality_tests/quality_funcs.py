@@ -38,6 +38,7 @@ voc_dict = {
     'voc_smooth2b' : ['excellent condition','good condition','average condition','bad condition','horrible condition'],
 }
 
+voc_names_list = list(voc_dict.keys())
 
 voc_list = [voc_dict[key] for key in voc_dict.keys()]
 all_vocabs = [voc for vocs in voc_list for voc in vocs]
@@ -250,7 +251,7 @@ def image_to_base64(image_path: str, return_html: bool = False, new_width: int =
         else:
             return base64_img
 
-def write_html_report(report_basename, img_path, sample_path, all_dfs):
+def write_html_report(report_basename, img_path, sample_path, all_dfs,write_tables=False):
     """
     Generate an HTML report with given information.
 
@@ -315,14 +316,15 @@ def write_html_report(report_basename, img_path, sample_path, all_dfs):
     """
 
     # Add the DataFrames to the content
-    for ref in zip(resolution_levels, all_dfs):
-        content += f"""
-        <h1>{ref[0]}</h1>
-        {ref[1].to_html(float_format=float_to_str)}
-        """
+    if write_tables:
+        for ref in zip(voc_names_list, all_dfs,strict=True):
+            content += f"""
+            <h1>{ref[0]}</h1>
+            {ref[1].to_html(float_format=float_to_str)}
+            """
     
     # chart generation:
-    for ref in zip(resolution_levels, all_dfs):
+    for ref in zip(voc_names_list, all_dfs,strict=True):
         with tempfile.TemporaryDirectory() as tmpdir:
             temp_path = os.path.join(tmpdir, f'temp.html')
             gen_rep_df_chart(ref[1], ref[0], temp_path)
