@@ -15,8 +15,8 @@ track,pathways surfaces,True,generic try for streets and sidewalks
 lateral,pathways surfaces,True,generic try for sidewalks and test AI allucinating
 walkway,pathways surfaces,True,generic try for sidewalks
 sidetrack,pathways surfaces,True,generic try for sidewalks
-anything,pathways surfaces,False,testing AI
-void,pathways surfaces,False,testing AI
+anything,testing,False,testing AI
+void,testing,False,testing AI
 way,pathways surfaces,True,generic try for streets and sidewalks
 earth,pathways surfaces,True,default pavement surface class
 soil,pathways surfaces,True,default pavement surface class
