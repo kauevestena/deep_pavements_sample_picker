@@ -24,3 +24,18 @@ territories_columns = ['territory','weight']
 
 # max samples mapillary:
 SAMPLES_MAPILLARY = 50
+
+# default surfaces from OSM
+default_surfaces = [
+    'asphalt',
+    'concrete',
+    'concrete_plates',
+    'grass',
+    'ground',
+    'sett',
+    'paving_stones',
+    'cobblestone',
+    'gravel',
+    'sand',
+    'compacted',
+]
