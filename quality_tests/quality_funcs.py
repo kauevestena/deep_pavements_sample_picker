@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 import io
 import base64
 import shutil
+import clip
+import open_clip
 
 n_samples = 2500
 

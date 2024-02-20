@@ -15,9 +15,10 @@ from tqdm import tqdm
 from libs.lang_sam_importer import *
 import random
 from shutil import rmtree
-import clip
-import open_clip
 import tempfile
+import logging
+
+logging.basicConfig(filename='global_log.log',level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S',filemode='w')
 
 def create_dir_if_not_exists(path):
     if not os.path.exists(path):

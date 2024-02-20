@@ -1,0 +1,28 @@
+class_prompt,superclasses,to_use_after,comment(optional)
+asphalt,pathways surfaces,True,default pavement surface class
+sett,pathways surfaces,True,default pavement surface class and test AI allucinating
+grass,pathways surfaces,True,default pavement surface class
+sidewalk,pathways surfaces,True,default for sidewalks
+street,pathways surfaces,True,default for streets
+car,cars,True,default for cars
+poles,poles,True,default for poles
+pavement,pathways surfaces,True,generic try for streets and sidewalks
+path,pathways surfaces,True,generic try for streets and sidewalks
+sidepath,pathways surfaces,True,generic try for sidewalks
+sideways,pathways surfaces,True,generic try for sidewalks
+cobblestone,pathways surfaces,True,default pavement surface class
+track,pathways surfaces,True,generic try for streets and sidewalks
+lateral,pathways surfaces,True,generic try for sidewalks and test AI allucinating
+walkway,pathways surfaces,True,generic try for sidewalks
+sidetrack,pathways surfaces,True,generic try for sidewalks
+anything,testing,False,testing AI
+void,testing,False,testing AI
+way,pathways surfaces,True,generic try for streets and sidewalks
+earth,pathways surfaces,True,default pavement surface class
+soil,pathways surfaces,True,default pavement surface class
+dirt,pathways surfaces,True,alternative pavement surface class
+sand,pathways surfaces,True,default pavement surface class
+concrete,pathways surfaces,True,default pavement surface class
+paving stones,pathways surfaces,True,default pavement surface class
+chipseal,pathways surfaces,True,default pavement surface class and test AI allucinating
+gravel,pathways surfaces,True,default pavement surface class and test AI allucinating

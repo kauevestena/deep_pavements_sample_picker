@@ -172,3 +172,5 @@ tests.py
 terr_polygons
 temp
 logs
+
+*.log

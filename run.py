@@ -2,10 +2,12 @@ from libs.mapillary_funcs import *
 
 
 def main():
+    
     model = LangSAM()
 
 
     create_dir_if_not_exists(terr_polygons_folder)
+    img_folderpath = None
 
     territory_list = get_territories_as_list()
     classes_list = get_classes_as_list()
@@ -52,23 +54,12 @@ def main():
 
             # we picked up a single image, but for now we will be working only with perspective images
             # TODO: work with panoramic images, maybe transforming into perspective ones
-                    
-            perspective_found = False
-            # pick a random row in the gdf:
-            for i in range(SAMPLES_MAPILLARY):
-                random_samples = random_samples_in_gdf(gdf,1)
-
-                if "camera_type" in random_samples.columns:
-                    if random_samples['camera_type'] == "perspective":
-                        perspective_found = True
-                        break
-                else:
-                    break
-
-
-            if not perspective_found:
-                # if there's no perspective ones we skip to the next random sample:
-                continue
+            perspective_ones = gdf[gdf['camera_type']=='perspective'].copy()
+            
+            random_samples = random_samples_in_gdf(perspective_ones,1)
+            
+            print(perspective_ones)
+            print(random_samples)
 
             for i in range(len(random_samples)):
 
@@ -136,6 +127,7 @@ def main():
 
         except Exception as e:
             print(e)
+            logging.exception(e)
             if os.path.exists(img_folderpath):
                 print(f'removing {img_folderpath}')
                 rmtree(img_folderpath)
