@@ -32,9 +32,11 @@ ENV REPODIR $HOME/deep_pavements_sample_picker
 COPY . $REPODIR
 WORKDIR $REPODIR
 RUN pip install -r requirements.txt
-RUN pip freeze > frozen_requirements.txt
 COPY mapillary_token configs/mapillary_token
 RUN python build_tests/test_configs.py
 # RUN python build_tests/test_clip.py
 # RUN python build_tests/test_openclip.py
+
+# saving frozen requirements:
+RUN pip list --format=freeze > frozen_requirements.txt
 
