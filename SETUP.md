@@ -11,7 +11,7 @@ If it isn't created, the building (check it below) process will fail.
 
 ## Running the docker image
 
-first buid:
+first, buid:
 
     docker build --tag 'deep_pavements_sample_picker' .
 
