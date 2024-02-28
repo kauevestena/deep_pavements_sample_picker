@@ -14,7 +14,7 @@ def main():
 
     gdfs_dict = {}
 
-    # we will pregenerate the gdfs, will be dumb to read in each iteration:
+    # we will pregenerate the gdfs, would be dumb to read in each iteration:
     for territory in territory_list:
         terr_name = slugify(territory)
 
