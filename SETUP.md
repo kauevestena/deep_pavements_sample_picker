@@ -19,11 +19,11 @@ then run:
 
     docker run --name running_deep_pavements_sp -v D:\segmentation_img_data:/workspace/data --gpus all -it 'deep_pavements_sample_picker' 
 
-replace "D:\semantic_segmentation_data" with the desired path for mounting a volume were the outputs shall be generated. If you wanna more than one running container, you can remove "--name running_deep_pavements". 
+replace "D:\semantic_segmentation_data" with the desired path for mounting a volume where the outputs shall be generated. You can remove "--name running_deep_pavements" if you want multiple running containers. 
 
-include "--detach" to run in background and "--rm" to remove on exit
+include "--detach" to run in the background and "--rm" to remove on exit
 
-# Running the sample colector:
+# Running the sample collector:
 
 Inside the container:
 
