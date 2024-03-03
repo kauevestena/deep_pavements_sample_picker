@@ -105,7 +105,8 @@ def main():
                                     prompt_name = slugify(prompt)
                                     prompt_folderpath = os.path.join(detections_folderpath, prompt_name)
                                     prompt_binary_masks_folderpath = os.path.join(binary_masks_folderpath, prompt_name)
-                                    create_folderlist([prompt_folderpath, prompt_binary_masks_folderpath])
+                                    prompt_clipped_detections_folderpath = os.path.join(clipped_detections_folderpath, prompt_name)
+                                    create_folderlist([prompt_folderpath, prompt_binary_masks_folderpath, prompt_clipped_detections_folderpath])
 
                                     for i in range (len(logits)):
                                         detection_box = tensor_to_string(boxes[i])
@@ -121,7 +122,7 @@ def main():
 
                                         write_detection_img(image_pil, masks[i], (), (), outpath_binary, binary=True)
 
-                                        outpath_clipped = os.path.join(clipped_detections_folderpath, f'{row_gdf_series.id}_{i}.png')
+                                        outpath_clipped = os.path.join(prompt_clipped_detections_folderpath, f'{row_gdf_series.id}_{i}.png')
 
                                         write_detection_img(image_pil, masks[i], (), (), outpath_clipped, clip=True)
 
