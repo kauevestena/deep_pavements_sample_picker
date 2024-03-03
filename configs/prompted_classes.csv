@@ -4,3 +4,5 @@ road,pathways surfaces,True,default for streets
 vehicle,cars,True,default for cars
 pole,poles,True,default for poles
 tree,poles,True,default for trees
+person,person,True,default for person
+building,building,True,default for building
