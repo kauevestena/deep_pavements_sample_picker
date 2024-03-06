@@ -1,6 +1,6 @@
 from quality_funcs import *
 
-SURFACE_SAMPLES_ROOTPATH = os.path.join(ROOTPATH,'deep_pavements_dataset','dataset')
+# SURFACE_SAMPLES_ROOTPATH = os.path.join(ROOTPATH,'deep_pavements_dataset','dataset')
 
 categories = os.listdir(SURFACE_SAMPLES_ROOTPATH)
 

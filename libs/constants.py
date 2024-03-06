@@ -41,3 +41,9 @@ default_surfaces = [
     'sand',
     'compacted',
 ]
+
+# surface dataset (from a separate repository):
+SURFACE_SAMPLES_ROOTPATH = '../data/deep_pavements_dataset/dataset'
+
+# Finetuning:
+FINETUNING_ROOTPATH = '../data/finetuned_models'
