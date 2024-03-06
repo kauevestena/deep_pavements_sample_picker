@@ -38,6 +38,7 @@ def main():
 
             polygon_gdf = gdfs_dict[terr_name]
 
+            attempt_count = 0
             while True:
 
                 query_bbox = random_tile_bbox_in_gdf(polygon_gdf,as_list=True)
@@ -50,7 +51,8 @@ def main():
                     print('sucessfull with',len(gdf),'images')
                     break
                 else:
-                    print('empty dataframe, trying again...')
+                    attempt_count += 1
+                    print(f'attempt {attempt_count}, trying again...')
 
             # we picked up a single image, but for now we will be working only with perspective images
             # TODO: work with panoramic images, maybe transforming into perspective ones

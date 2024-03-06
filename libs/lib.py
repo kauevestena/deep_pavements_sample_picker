@@ -17,6 +17,7 @@ import random
 from shutil import rmtree
 import tempfile
 import logging
+from configs.options import *
 
 logging.basicConfig(filename='global_log.log',level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S',filemode='w')
 
