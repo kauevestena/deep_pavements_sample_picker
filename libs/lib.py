@@ -391,3 +391,6 @@ for pathname in (ROOT_OUTFOLDERPATH, REPORTS_PATH):
 def simple_read(filepath):
     with open(filepath,'r',encoding='utf-8') as f:
         return f.read()
+    
+def listdir_fullpath(path):
+    return [os.path.join(path, f) for f in os.listdir(path)]

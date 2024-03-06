@@ -10,6 +10,8 @@ ROOTPATH = '../data'
 
 REPORTS_PATH = '../data/reports'
 
+EXT = '.png'
+
 ROOT_OUTFOLDERPATH = '../data/samples'
 lang_sam_path = '../lang-segment-anything/lang_sam'
 terr_polygons_folder = 'terr_polygons'
