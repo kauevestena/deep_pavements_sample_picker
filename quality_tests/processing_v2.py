@@ -73,10 +73,12 @@ for model_info in tqdm(models):
                         write_to_raw_report_v2(final_name,voc_name,voc, content)
 
                 except Exception as e:
+                    logging.exception(e)
                     print(e)
 
                 
     except Exception as e:
+        logging.exception(e)
         print(e)
 
                 
