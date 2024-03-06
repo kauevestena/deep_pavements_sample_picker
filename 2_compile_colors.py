@@ -41,6 +41,8 @@ for territory in tqdm(territory_list):
 
         dump_json(colordict, os.path.join(sample_folderpath, 'color_schema.json'))
 
+    # TODO: write the reclassified using the .csv file
+
 
 
         
