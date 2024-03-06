@@ -1,15 +1,14 @@
 from finetuning_lib import *
-from torch.utils.data import DataLoader, random_split
-from torchvision import datasets, transforms
 from clip.model import CLIP
 from clip import clip
 
 EPOCHS = 100
-MODEL_NAME = "ViT-L/14@336px" #"ViT-B/32"
-TRAIN_PERC = 0.6
+MODEL_NAME = "ViT-B/32" #"ViT-L/14" #"RN50x64"
+TRAIN_PERC = 0.62
 DATA_ROOTPATH = SURFACE_SAMPLES_ROOTPATH
 EXTRA_PART_NAME = '_default_configs_'
-RESIZE = 336
+# 224 is the most common:
+RESIZE = 224
 
 # other params:
 norm_means = (0.5, 0.5, 0.5)
@@ -68,9 +67,12 @@ for epoch in tqdm(range(EPOCHS)):
         images = images.cuda()
         labels = labels.cuda()
 
-        optimizer.zero_grad()
-        logits_per_image, _ = model(images)
+        # Provide dummy text inputs
+        dummy_text = torch.zeros(images.shape[0], dtype=torch.long, device=images.device)
+        logits_per_image, _ = model(images, dummy_text)  # Pass both image and dummy text
         loss = criterion(logits_per_image, labels)
+        
+        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
@@ -82,15 +84,22 @@ for epoch in tqdm(range(EPOCHS)):
             images = images.cuda()
             labels = labels.cuda()
 
-            logits_per_image, _ = model(images)
+            # Convert label indices to text inputs
+            label_texts = [full_dataset.classes[label_idx] for label_idx in labels]
+
+            # Preprocess label texts
+            label_text_inputs = clip.tokenize(label_texts).cuda()
+
+            # Forward pass
+            logits_per_image, _ = model(images, label_text_inputs)  # Pass both image and label text
+            
             _, predicted_labels = torch.max(logits_per_image, 1)
             total_correct += (predicted_labels == labels).sum().item()
             total_samples += labels.size(0)
-
+    
     accuracy = total_correct / total_samples
-
     accuracies.append(accuracy)
-    lossess.append(loss.item())
+    lossess.append(loss)
     print(f"Epoch {epoch+1}/{EPOCHS}, Loss: {loss.item()}, Test Accuracy: {accuracy}")
 
 # adding info to the model metadata
