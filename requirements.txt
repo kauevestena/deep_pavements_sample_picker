@@ -10,3 +10,4 @@ gpustat
 tabulate
 plotly
 cmocean
+scipy

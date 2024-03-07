@@ -1,3 +1,5 @@
+import sys
+sys.path.append('.')
 from libs.colors import *
 import requests
 import torch
@@ -16,8 +18,6 @@ n_classes = len(classes_list)
 colors = get_discrete_colormap(n_classes)
 
 colordict = {cl: colors[i] for i, cl in enumerate(classes_list)}
-
-print(territory_list, classes_list)
 
 for territory in tqdm(territory_list):
     terr_name = slugify(territory)
@@ -44,7 +44,14 @@ for territory in tqdm(territory_list):
         # save the image
         outpath = os.path.join(sample_folderpath, 'segformer_result'+EXT)
         outpath_blended = os.path.join(sample_folderpath, sample_number+'segformer_result_blended'+EXT)
-        predicted_semantic_map.save(outpath)
+        as_np = predicted_semantic_map.cpu().numpy()
+        unique_values = list(np.unique(predicted_semantic_map))
+        colormap = get_discrete_colormap(len(unique_values))
+        color_dict = {unique_values[i]:colormap[i] for i in range(len(unique_values))}
+        
+        coloured = create_rgb_matrix(as_np, color_dict)
+        
+        cv2.imwrite(outpath, coloured)
 
         blend_images(image_path, outpath, outpath=outpath_blended)
 

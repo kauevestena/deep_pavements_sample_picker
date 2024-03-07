@@ -99,3 +99,29 @@ def blend_images(image1, image2, alpha=0.5,outpath=None):
     cv2.imwrite(outpath, blended_image)
 
   return blended_image
+
+def create_rgb_matrix(matrix, colordict):
+    """
+    Create an RGB matrix from the input matrix using the provided colordict.
+
+    Args:
+        matrix (np.ndarray): Input numpy matrix.
+        colordict (dict): Dictionary mapping keys to RGB color values.
+
+    Returns:
+        np.ndarray: RGB matrix.
+    """
+    # Create an empty result matrix with shape (height, width, 3)
+    h, w = matrix.shape
+    result_matrix = np.zeros((h, w, 3), dtype=np.uint8)
+
+    # Assign RGB colors to each pixel based on the class labels in the matrix
+    for unique_value in np.unique(matrix):
+        if unique_value in colordict:
+            # Replace the value with the corresponding RGB color
+            result_matrix[matrix == unique_value] = colordict[unique_value]
+        else:
+            # If the value is not in the colordict, keep it unchanged (black)
+            result_matrix[matrix == unique_value] = [0, 0, 0]
+
+    return result_matrix
