@@ -3,7 +3,7 @@ from quality_funcs import *
 models = [
     ('openclip', 'ViT-H-14-378-quickgelu','dfn5b'),
     ('openclip', 'EVA02-E-14-plus','laion2b_s9b_b144k'),
-    ('openclip', 'ViT-bigG-14-CLIPA-336',''),
+    ('openclip', 'ViT-bigG-14-CLIPA-336','datacomp1b'),
     ('openclip', 'ViT-SO400M-14-SigLIP-384','webli'),
     ('clip', 'RN101'),
     ('clip', 'RN50x64'),
