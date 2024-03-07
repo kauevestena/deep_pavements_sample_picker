@@ -86,7 +86,7 @@ def write_to_raw_report_v2(report_name,voc_name,vocabulary,content):
     append_to_file(report_path,content)
     
 def write_to_raw_report_v3(prediction,categories,model_name,base_path,content):
-    report_path = os.path.join(base_path,model_name+'.csv')
+    report_path = os.path.join(base_path,model_name.replace('/','_')+'.csv')
 
     header = 'prediction,' + ','.join(categories) + ',filename\n'
 
