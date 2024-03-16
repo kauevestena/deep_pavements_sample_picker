@@ -1,7 +1,9 @@
 
-from libs.lib import *
+from libs.mapillary_funcs import *
 import numpy as np
 from cmocean.cm import phase
+from scipy import ndimage
+
 
 def get_discrete_colormap(num_steps):
   """
@@ -125,3 +127,74 @@ def create_rgb_matrix(matrix, colordict):
             result_matrix[matrix == unique_value] = [0, 0, 0]
 
     return result_matrix
+  
+def apply_mask_np(image, mask):
+  """
+  Applies a boolean mask to a RGB PIL image.
+
+  Args:
+      image: A 3D NumPy array representing the RGB image.
+      mask: A 2D NumPy boolean array representing the mask.
+
+  Returns:
+      A masked image (either a subset of the original image or the full image with masked pixels set to zero).
+  """
+  # Check if the mask has the same spatial dimensions as the image
+  if mask.shape[:2] != image.shape[:2]:
+    raise ValueError("Mask dimensions must match the image's spatial dimensions.")
+
+  # Expand the mask to 3D if necessary
+  if mask.ndim < 3:
+    mask_3d = np.repeat(mask[..., None], 3, axis=2)
+  else:
+    mask_3d = mask
+
+  # Apply the mask using element-wise multiplication
+  masked_image = image * mask_3d
+
+  # Alternatively, use boolean indexing for potentially better memory efficiency
+  # masked_image = image[mask]
+
+  return masked_image
+
+def split_matrix_into_regions(data,threshold=2):
+  """
+  Splits a Boolean matrix into a list of contiguous True regions. Handles cases
+  with only False values efficiently, ensures returned regions are 2D, and removes
+  padding.
+
+  Args:
+      data (np.ndarray): A 2D Boolean matrix.
+
+  Returns:
+      list: A list of ndarrays, where each element represents a contiguous True region
+          in the original unpadded matrix. If the entire matrix is False, an empty list 
+          is returned.
+
+  """
+  # Check for all False before processing
+  if not np.any(data):
+    return []
+  
+  data_total_pixels = data.shape[0] * data.shape[1]
+
+  padded_data = np.pad(data, pad_width=1, mode='constant', constant_values=False)
+  labeled_data, num_features = ndimage.label(padded_data)
+
+  # Get original data shape for unpadding
+  original_shape = data.shape
+
+  regions = []
+  for label in range(1, labeled_data.max() + 1):
+    region_mask = labeled_data == label
+    # Extract region data and remove padding based on original shape
+    pix_area = sum(sum(region_mask))
+    
+    pix_area_perc = (pix_area / data_total_pixels) * 100
+    
+    logging.info(f'{data_total_pixels}, {pix_area}, {pix_area_perc}')
+    
+    if pix_area_perc > threshold:
+      regions.append(region_mask[1:-1, 1:-1])
+    
+  return regions
