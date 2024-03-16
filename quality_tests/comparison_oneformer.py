@@ -4,12 +4,12 @@ from libs.colors import *
 import requests
 import torch
 from PIL import Image
-from transformers import AutoImageProcessor, Mask2FormerForUniversalSegmentation
+from transformers import OneFormerProcessor, OneFormerForUniversalSegmentation
 
-processor = AutoImageProcessor.from_pretrained("facebook/mask2former-swin-large-cityscapes-semantic")
-model = Mask2FormerForUniversalSegmentation.from_pretrained("facebook/mask2former-swin-large-cityscapes-semantic")
+processor = OneFormerProcessor.from_pretrained("shi-labs/oneformer_cityscapes_swin_large")
+model = OneFormerForUniversalSegmentation.from_pretrained("shi-labs/oneformer_cityscapes_swin_large")
 
-extra_str = 'segformer'
+extra_str = 'oneformer'
 
 # we go after the same structure in the run.py file:
 territory_list = get_territories_as_list()
@@ -32,7 +32,7 @@ for territory in tqdm(territory_list):
         image_path = os.path.join(sample_folderpath, sample_number+EXT)
 
         image = Image.open(image_path)
-        inputs = processor(images=image, return_tensors="pt")
+        inputs = processor(images=image, task_inputs=["semantic"], return_tensors="pt")
         
         with torch.no_grad():
             outputs = model(**inputs)
