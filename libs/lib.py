@@ -91,18 +91,22 @@ def get_territory_polygon(place_name,outpath=None):
 
     # Parse the response as a JSON object
     data = response.json()
-
+    
     # sort data by "importance", that is a key in each dictionary of the list:
     data.sort(key=lambda x: x["importance"], reverse=True)
+    
+    # removing all non-polygon objects:
+    data = [d for d in data if d['geojson']['type'] == 'Polygon']
 
     # Get the polygon of the territory as a GeoJSON object
-    polygon = data[0]['geojson']
+    if data:
+        polygon = data[0]['geojson']
 
-    if outpath:
-        dump_json(polygon, outpath)
+        if outpath:
+            dump_json(polygon, outpath)
 
-    # Return the polygon
-    return polygon
+        # Return the polygon
+        return polygon
 
 
 def tilerange_from_bbox(minlat,minlon,maxlat,maxlon,zoom=ZOOM_LEVEL):
