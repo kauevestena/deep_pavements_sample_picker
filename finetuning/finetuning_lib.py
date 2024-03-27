@@ -8,10 +8,15 @@ from torch.utils.data import DataLoader, random_split
 
 import torch
 
+# creating the paths if they don't exist
+create_folderlist([FINETUNING_ROOTPATH])
+
+# TODO: check if the dataset exists, otherwise clone the repository
+
 def get_available_dataset_classes():
     return os.listdir(SURFACE_SAMPLES_ROOTPATH)
 
-def get_available_dataset_classes_numbers():
+def get_class_amounts():
     ret_dict = {}
 
     for classname in get_available_dataset_classes():
@@ -22,60 +27,46 @@ def get_available_dataset_classes_numbers():
     return ret_dict
 
 
-def recover_from_batch_list(batch_list):
-    ret_dict = {}
+def simple_class_listing(zipped=True,shuffle=True):
+    surface_classes = []
+    image_paths = []
 
-    for entry in batch_list:
-        filepath = entry[0]
-        tokenized = os.path.normpath(filepath).split(os.path.sep)
-        category = tokenized[-2]
-        sample = tokenized[-1]
+    for classname in get_available_dataset_classes():
+        class_dirpath = os.path.join(SURFACE_SAMPLES_ROOTPATH, classname)
 
-        if category not in ret_dict:
-            ret_dict[category] = []
+        class_images = os.listdir(class_dirpath)
 
-        ret_dict[category].append(sample)
+        if shuffle:
+            random.shuffle(class_images)
 
-    return ret_dict
+        for sample in class_images:
+            image_path = os.path.join(class_dirpath, sample)
 
-def recover_samples(full_dataset,train_dataset, test_dataset):
-    indices_train = train_dataset.indices
-    indices_test = test_dataset.indices
+            surface_classes.append(classname)
+            image_paths.append(image_path)
 
-    train_batch = [full_dataset.samples[i] for i in indices_train]
-    test_batch = [full_dataset.samples[i] for i in indices_test]
-
-    return {
-        'train': recover_from_batch_list(train_batch),
-        'test': recover_from_batch_list(test_batch)
-    }
-
-def preprocess_image(image_path):
-    img = transforms.ToTensor()(transforms.Image.open(image_path))  # Load and convert to tensor
-    img = transforms.Resize(224)(img)  # Resize to 224x224 (common CLIP input size)
-    img = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))(img)  # Normalize
-    return img
-
-class ImageTextDataset(torch.utils.data.Dataset):
-    def __init__(self, data_dir):
-        self.data_dir = data_dir
-        self.image_paths = []
-        self.labels = []
-
-        # Recursively traverse subfolders to find images and labels
-        for root, _, files in os.walk(data_dir):
-            label = root.split("/")[-1]
-            for filename in files:
-                if filename.lower().endswith((".jpg", ".jpeg", ".png")):
-                    self.image_paths.append(os.path.join(root, filename))
-                    self.labels.append(label)
-
-    def __len__(self):
-        return len(self.image_paths)
-
-    def __getitem__(self, idx):
-        image_path = self.image_paths[idx]
-        image = preprocess_image(image_path)
-        label = self.labels[idx]
-        return image, label
+    if zipped:
+        return list(zip(surface_classes, image_paths,strict=True))
     
+    else:
+        return image_paths, surface_classes
+    
+def split_by_percentage(data, perc):
+  """
+  Splits a list into two sublists based on a single percentage, ensuring all elements are included.
+
+  Args:
+      data: The list to be split.
+      perc: The percentage to include in the first sublist (between 0 and 100).
+
+  Returns:
+      A tuple containing two sublists. The first sublist contains 'perc'% of the data (rounded up), 
+      and the second sublist contains the remaining data.
+  """
+
+  if not (0 <= perc <= 100):
+    raise ValueError("Percentage must be between 0 and 100")
+
+  list_len = len(data)
+  split_index = int(max(1, list_len * (perc / 100)))  # Ensure at least 1 element in first sublist
+  return data[:split_index], data[split_index:]

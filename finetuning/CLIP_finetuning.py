@@ -1,122 +1,102 @@
 from finetuning_lib import *
-from clip.model import CLIP
-from clip import clip
+from PIL import Image
+from tqdm import tqdm
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
+import clip
+from transformers import CLIPProcessor, CLIPModel
 
-EPOCHS = 100
-MODEL_NAME = "ViT-B/32" #"ViT-L/14" #"RN50x64"
-TRAIN_PERC = 0.62
-DATA_ROOTPATH = SURFACE_SAMPLES_ROOTPATH
-EXTRA_PART_NAME = '_default_configs_'
-# 224 is the most common:
-RESIZE = 224
 
-# other params:
-norm_means = (0.5, 0.5, 0.5)
-norm_stds = (0.5, 0.5, 0.5)
-batch_size = 32
-lr = 1e-4
+NUM_EPOCHS = 100
+BATCH_SIZE = 256
+MODEL_OUTNAME = 'model_fulldata_100_epochs.pt'
 
-print('finetuning on the following classes: ',*get_available_dataset_classes())
+# Load the CLIP model and processor
+model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
-metadata = {
-    'classes': get_available_dataset_classes_numbers()
-}
+
+# Choose computation device
+device = 'cuda'
 
 # Load pre-trained CLIP model
-model, preprocess = clip.load(MODEL_NAME, device=DEVICE)
+model, preprocess = clip.load("ViT-B/32", device=device, jit=False)
 
-# configs dict
-configs = {
-    'norm_means': norm_means,
-    'norm_stds': norm_stds,
-    'resize': RESIZE,
-    'batch_size': batch_size,
-    'lr': lr
-}
+# Define a custom dataset
+class image_title_dataset():
+    def __init__(self, list_image_path,list_txt):
+        # Initialize image paths and corresponding texts
+        self.image_path = list_image_path
+        # Tokenize text using CLIP's tokenizer
+        self.title  = clip.tokenize(list_txt)
 
-# Define data transformations
-transform = transforms.Compose([
-    transforms.Resize((RESIZE, RESIZE)),
-    transforms.ToTensor(),
-    transforms.Normalize(norm_means, norm_stds),
-])
+    def __len__(self):
+        return len(self.title)
 
-# Define dataset
-full_dataset = datasets.ImageFolder(root=DATA_ROOTPATH, transform=transform)
+    def __getitem__(self, idx):
+        # Preprocess image using CLIP's preprocessing function
+        image = preprocess(Image.open(self.image_path[idx]))
+        title = self.title[idx]
+        return image, title
 
-# Split dataset into training and testing sets
-train_size = int(TRAIN_PERC * len(full_dataset))
-test_size = len(full_dataset) - train_size
-train_dataset, test_dataset = random_split(full_dataset, [train_size, test_size])
-
-# Define dataloaders for training and testing
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-
-# Fine-tune the model
-optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-criterion = torch.nn.CrossEntropyLoss()
-
-accuracies = []
-lossess = []
-
-# Training loop
-for epoch in tqdm(range(EPOCHS)):
-    model.train()
-    for images, labels in tqdm(train_loader):
-        images = images.cuda()
-        labels = labels.cuda()
-
-        # Provide dummy text inputs
-        dummy_text = torch.zeros(images.shape[0], dtype=torch.long, device=images.device)
-        logits_per_image, _ = model(images, dummy_text)  # Pass both image and dummy text
-        loss = criterion(logits_per_image, labels)
-        
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-    model.eval()
-    total_correct = 0
-    total_samples = 0
-    with torch.no_grad():
-        for images, labels in tqdm(test_loader):
-            images = images.cuda()
-            labels = labels.cuda()
-
-            # Convert label indices to text inputs
-            label_texts = [full_dataset.classes[label_idx] for label_idx in labels]
-
-            # Preprocess label texts
-            label_text_inputs = clip.tokenize(label_texts).cuda()
-
-            # Forward pass
-            logits_per_image, _ = model(images, label_text_inputs)  # Pass both image and label text
-            
-            _, predicted_labels = torch.max(logits_per_image, 1)
-            total_correct += (predicted_labels == labels).sum().item()
-            total_samples += labels.size(0)
+# use your own data
+# list_image_path = []
+# list_txt = []
     
-    accuracy = total_correct / total_samples
-    accuracies.append(accuracy)
-    lossess.append(loss)
-    print(f"Epoch {epoch+1}/{EPOCHS}, Loss: {loss.item()}, Test Accuracy: {accuracy}")
+list_image_path, list_txt = simple_class_listing(False)
 
-# adding info to the model metadata
-metadata['epochs'] = epoch+1
-metadata['train_perc'] = TRAIN_PERC
-metadata['accuracy'] = accuracies
-metadata['loss'] = lossess
-metadata['configs'] = configs
-metadata['data_split'] = recover_samples(full_dataset,train_dataset, test_dataset)
+dataset = image_title_dataset(list_image_path, list_txt)
+train_dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True) #Define your own dataloader
 
-# Save the fine-tuned model
-modelname = MODEL_NAME+EXTRA_PART_NAME+'finetuned'
+# Function to convert model's parameters to FP32 format
+def convert_models_to_fp32(model): 
+    for p in model.parameters(): 
+        p.data = p.data.float() 
+        p.grad.data = p.grad.data.float() 
 
-## saving model metadata:
-outpath_md = os.path.join(FINETUNING_ROOTPATH,modelname+'.json')
-dump_json(metadata, outpath_md)
+# Prepare the optimizer
+optimizer = torch.optim.Adam(model.parameters(), lr=5e-5,betas=(0.9,0.98),eps=1e-6,weight_decay=0.2) # the lr is smaller, more safe for fine tuning to new dataset
 
-## saving the model
-outpath = os.path.join(FINETUNING_ROOTPATH,modelname+'.pth')
-torch.save(model.state_dict(), "fine_tuned_clip_model.pth")
+
+# Specify the loss function
+loss_img = nn.CrossEntropyLoss()
+loss_txt = nn.CrossEntropyLoss()
+
+# Train the model
+for epoch in range(NUM_EPOCHS):
+    pbar = tqdm(train_dataloader, total=len(train_dataloader))
+    for batch in pbar:
+        optimizer.zero_grad()
+
+        images,texts = batch 
+        
+        images= images.to(device)
+        texts = texts.to(device)
+
+        # Forward pass
+        logits_per_image, logits_per_text = model(images, texts)
+
+        # Compute loss
+        ground_truth = torch.arange(len(images),dtype=torch.long,device=device)
+        total_loss = (loss_img(logits_per_image,ground_truth) + loss_txt(logits_per_text,ground_truth))/2
+
+        # Backward pass
+        total_loss.backward()
+
+        convert_models_to_fp32(model)
+        optimizer.step()
+        clip.model.convert_weights(model)
+
+        pbar.set_description(f"Epoch {epoch}/{NUM_EPOCHS}, Loss: {total_loss.item():.4f}")
+
+model_outpath = os.path.join(FINETUNING_ROOTPATH,MODEL_OUTNAME)
+
+
+# Save the model:
+torch.save({
+        'epoch': epoch,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'loss': total_loss,
+        }, model_outpath)
