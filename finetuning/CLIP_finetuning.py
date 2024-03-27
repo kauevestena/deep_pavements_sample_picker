@@ -1,59 +1,37 @@
 from finetuning_lib import *
-from PIL import Image
-from tqdm import tqdm
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader
-import clip
-from transformers import CLIPProcessor, CLIPModel
-
 
 NUM_EPOCHS = 100
 BATCH_SIZE = 256
-MODEL_OUTNAME = 'model_fulldata_100_epochs.pt'
+MODEL_OUTNAME = 'model_100_epochs'
 
 # Load the CLIP model and processor
-model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
-processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+pretrained_key = 'openai/clip-vit-base-patch32'
+base_model = "ViT-B/32"
+
+model = CLIPModel.from_pretrained(pretrained_key)
+processor = CLIPProcessor.from_pretrained(pretrained_key)
 
 
 # Choose computation device
 device = 'cuda'
 
 # Load pre-trained CLIP model
-model, preprocess = clip.load("ViT-B/32", device=device, jit=False)
+model, preprocess = clip.load(base_model, device=device, jit=False)
 
-# Define a custom dataset
-class image_title_dataset():
-    def __init__(self, list_image_path,list_txt):
-        # Initialize image paths and corresponding texts
-        self.image_path = list_image_path
-        # Tokenize text using CLIP's tokenizer
-        self.title  = clip.tokenize(list_txt)
 
-    def __len__(self):
-        return len(self.title)
-
-    def __getitem__(self, idx):
-        # Preprocess image using CLIP's preprocessing function
-        image = preprocess(Image.open(self.image_path[idx]))
-        title = self.title[idx]
-        return image, title
 
 # use your own data
 # list_image_path = []
 # list_txt = []
-    
-list_image_path, list_txt = simple_class_listing(False)
+
+images_split_path = os.path.join(FINETUNING_ROOTPATH,MODEL_OUTNAME+'_images_split.json')
+
+# list_image_path, list_txt = simple_class_listing(False)
+
+list_image_path, list_txt, list_image_path_test, list_txt_test = splitted_class_listing(outpath=images_split_path)
 
 dataset = image_title_dataset(list_image_path, list_txt)
 train_dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True) #Define your own dataloader
-
-# Function to convert model's parameters to FP32 format
-def convert_models_to_fp32(model): 
-    for p in model.parameters(): 
-        p.data = p.data.float() 
-        p.grad.data = p.grad.data.float() 
 
 # Prepare the optimizer
 optimizer = torch.optim.Adam(model.parameters(), lr=5e-5,betas=(0.9,0.98),eps=1e-6,weight_decay=0.2) # the lr is smaller, more safe for fine tuning to new dataset
@@ -63,8 +41,10 @@ optimizer = torch.optim.Adam(model.parameters(), lr=5e-5,betas=(0.9,0.98),eps=1e
 loss_img = nn.CrossEntropyLoss()
 loss_txt = nn.CrossEntropyLoss()
 
+losses = []
+
 # Train the model
-for epoch in range(NUM_EPOCHS):
+for epoch in tqdm(range(NUM_EPOCHS)):
     pbar = tqdm(train_dataloader, total=len(train_dataloader))
     for batch in pbar:
         optimizer.zero_grad()
@@ -90,7 +70,20 @@ for epoch in range(NUM_EPOCHS):
 
         pbar.set_description(f"Epoch {epoch}/{NUM_EPOCHS}, Loss: {total_loss.item():.4f}")
 
-model_outpath = os.path.join(FINETUNING_ROOTPATH,MODEL_OUTNAME)
+        losses.append(total_loss.item())
+
+training_report = {
+    'epochs': NUM_EPOCHS,
+    'batch_size': BATCH_SIZE,
+    'pretrained_model': pretrained_key,
+    'model': base_model,
+    'model_outname': MODEL_OUTNAME,
+    'losses': losses,
+}
+
+dump_json(training_report, os.path.join(FINETUNING_ROOTPATH,MODEL_OUTNAME+'_training_report.json'))
+
+model_outpath = os.path.join(FINETUNING_ROOTPATH,MODEL_OUTNAME+'.pt')
 
 
 # Save the model:
