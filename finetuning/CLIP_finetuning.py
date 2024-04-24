@@ -1,25 +1,5 @@
 from finetuning_lib import *
 
-NUM_EPOCHS = 100
-BATCH_SIZE = 256
-MODEL_OUTNAME = 'model_100_epochs'
-
-# Load the CLIP model and processor
-pretrained_key = 'openai/clip-vit-base-patch32'
-base_model = "ViT-B/32"
-
-model = CLIPModel.from_pretrained(pretrained_key)
-processor = CLIPProcessor.from_pretrained(pretrained_key)
-
-
-# Choose computation device
-device = 'cuda'
-
-# Load pre-trained CLIP model
-model, preprocess = clip.load(base_model, device=device, jit=False)
-
-
-
 # use your own data
 # list_image_path = []
 # list_txt = []

@@ -14,6 +14,21 @@ from transformers import CLIPProcessor, CLIPModel
 
 import torch
 
+
+NUM_EPOCHS = 200
+BATCH_SIZE = 256
+MODEL_OUTNAME = 'model_500_samples_paper'
+
+# Load the CLIP model and processor
+pretrained_key = 'openai/clip-vit-base-patch32'
+base_model = "ViT-B/32"
+model = CLIPModel.from_pretrained(pretrained_key)
+processor = CLIPProcessor.from_pretrained(pretrained_key)
+# Choose computation device
+device = 'cuda'
+# Load pre-trained CLIP model
+model, preprocess = clip.load(base_model, device=device, jit=False)
+
 # creating the paths if they don't exist
 create_folderlist([FINETUNING_ROOTPATH])
 

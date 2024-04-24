@@ -1,9 +1,9 @@
 from finetuning_lib import *
 
-model_filename = 'model_100_epochs'
+model_filename_base = MODEL_OUTNAME
 
-model_filepath = os.path.join(FINETUNING_ROOTPATH,model_filename +'.pt')
-image_split_path = os.path.join(FINETUNING_ROOTPATH,model_filename+'_images_split.json')
+model_filepath = os.path.join(FINETUNING_ROOTPATH,model_filename_base +'.pt')
+image_split_path = os.path.join(FINETUNING_ROOTPATH,model_filename_base+'_images_split.json')
 
 image_split_data = read_json(image_split_path)
 
@@ -15,11 +15,11 @@ class_prompts = list(set(list_txt_test))
 
 test_dataset = list(zip(list_txt_test,list_image_path_test))
 
-model, preprocess = clip.load("ViT-B/32",device=DEVICE,jit=False) 
+# model, preprocess = clip.load("ViT-B/32",device=DEVICE,jit=False) 
 checkpoint = torch.load(model_filepath)
 model.load_state_dict(checkpoint['model_state_dict'])
 
-with open(os.path.join(FINETUNING_ROOTPATH,model_filename+'_evaluation.csv'), 'w') as report:
+with open(os.path.join(FINETUNING_ROOTPATH,model_filename_base+'_evaluation.csv'), 'w') as report:
 
     # write header
     report.write('label,' + ','.join(class_prompts) + ',filepath' +  '\n')
