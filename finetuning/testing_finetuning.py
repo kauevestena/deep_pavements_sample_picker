@@ -38,6 +38,6 @@ with open(os.path.join(FINETUNING_ROOTPATH,model_filename_base+'_evaluation.csv'
 
             probs = logits_per_image.softmax(dim=-1).cpu().numpy().tolist()[0]
 
-            print("Label probs:", probs)
+            # print("Label probs:", probs)
 
             report.write(label + ',' + ','.join([str(x) for x in probs]) + ',' + image_path + '\n')
