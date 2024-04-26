@@ -15,9 +15,9 @@ from transformers import CLIPProcessor, CLIPModel
 import torch
 
 
-NUM_EPOCHS = 200
+NUM_EPOCHS = 100
 BATCH_SIZE = 256
-MODEL_OUTNAME = 'model_500_samples_paper'
+MODEL_OUTNAME = 'model_500_samples_orig_configs_plus_amsgrad'
 
 # Load the CLIP model and processor
 pretrained_key = 'openai/clip-vit-base-patch32'

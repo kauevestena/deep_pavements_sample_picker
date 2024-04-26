@@ -14,7 +14,33 @@ dataset = image_title_dataset(list_image_path, list_txt)
 train_dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True) #Define your own dataloader
 
 # Prepare the optimizer
-optimizer = torch.optim.Adam(model.parameters(), lr=5e-5,betas=(0.9,0.98),eps=1e-6,weight_decay=0.2) # the lr is smaller, more safe for fine tuning to new dataset
+optimizer = torch.optim.Adam(model.parameters(),
+                            #  lr=5e-5,
+                             betas=(0.9,0.98),
+                             eps=5e-8,
+                            #  weight_decay=0.2,
+                             weight_decay=0.3,
+                             amsgrad=True,
+                             lr=5e-9
+                            ) # the lr is smaller, more safe for fine tuning to new dataset
+
+
+# original configs:
+
+# optimizer = torch.optim.Adam(model.parameters(), lr=5e-5,betas=(0.9,0.98),eps=1e-6,weight_decay=0.2) # the lr is smaller, more safe for fine tuning to new dataset
+
+
+# v5 was trained with:
+
+# optimizer = torch.optim.Adam(model.parameters(),
+#                             #  lr=5e-5,
+#                              betas=(0.9,0.98),
+#                              eps=1e-6,
+#                             #  weight_decay=0.2,
+#                              weight_decay=0.5,
+#                              amsgrad=True,
+#                              lr=5e-6
+#                             )
 
 
 # Specify the loss function

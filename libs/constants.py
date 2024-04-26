@@ -48,3 +48,4 @@ SURFACE_SAMPLES_REPORTS_ROOTPATH = '../data/deep_pavements_dataset/analysis'
 
 # Finetuning:
 FINETUNING_ROOTPATH = '../data/finetuned_models'
+FINETUNING_EVALUATION_ROOTPATH = '../data/deep_pavements_dataset/analysis/finetuned'

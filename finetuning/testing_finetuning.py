@@ -1,3 +1,4 @@
+from shutil import copyfile
 from finetuning_lib import *
 
 model_filename_base = MODEL_OUTNAME
@@ -19,7 +20,10 @@ test_dataset = list(zip(list_txt_test,list_image_path_test))
 checkpoint = torch.load(model_filepath)
 model.load_state_dict(checkpoint['model_state_dict'])
 
-with open(os.path.join(FINETUNING_ROOTPATH,model_filename_base+'_evaluation.csv'), 'w') as report:
+report_name = model_filename_base+'_evaluation.csv'
+report_path = os.path.join(FINETUNING_ROOTPATH,report_name)
+
+with open(report_path, 'w') as report:
 
     # write header
     report.write('label,' + ','.join(class_prompts) + ',filepath' +  '\n')
@@ -41,3 +45,6 @@ with open(os.path.join(FINETUNING_ROOTPATH,model_filename_base+'_evaluation.csv'
             # print("Label probs:", probs)
 
             report.write(label + ',' + ','.join([str(x) for x in probs]) + ',' + image_path + '\n')
+
+# copy report directly
+copyfile(report_path, os.path.join(FINETUNING_EVALUATION_ROOTPATH,report_name))
