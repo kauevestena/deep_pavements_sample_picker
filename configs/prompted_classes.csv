@@ -1,8 +1,13 @@
 class_prompt,superclasses,to_use_after,comment(optional)
-building,building,True,default for building
-sidewalk,pathways surfaces,True,default for sidewalks
 road,pathways surfaces,True,default for streets
-pole,poles,True,default for poles
-tree,trees,True,default for trees
-vehicle,cars,True,default for cars
-person,person,True,default for person
+street,pathways surfaces, True, streets
+pathway,pathways surfaces, True, paths
+compacted,pathways surfaces, True, surfaces
+compacted,pathways surfaces, True, surfaces
+asphalt,pathways surfaces, True, surfaces
+concrete-plates,pathways surfaces, True, surfaces
+ground,pathways surfaces, True, surfaces
+nothing, nonsense, False, tests
+something, nonsense, False, tests
+anything, nonsense, False, tests
+void, nonsense, False, tests
