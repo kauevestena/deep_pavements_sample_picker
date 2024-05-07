@@ -1,13 +1,3 @@
 class_prompt,superclasses,to_use_after,comment(optional)
-road,pathways surfaces,True,default for streets
-street,pathways surfaces, True, streets
-pathway,pathways surfaces, True, paths
-compacted,pathways surfaces, True, surfaces
-compacted,pathways surfaces, True, surfaces
-asphalt,pathways surfaces, True, surfaces
-concrete-plates,pathways surfaces, True, surfaces
-ground,pathways surfaces, True, surfaces
-nothing, nonsense, False, tests
-something, nonsense, False, tests
-anything, nonsense, False, tests
-void, nonsense, False, tests
+tree,pathways surfaces,True,default for streets
+vehicle,pathways surfaces, True, streets
