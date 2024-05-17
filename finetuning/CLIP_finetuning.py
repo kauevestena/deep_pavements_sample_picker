@@ -15,13 +15,11 @@ train_dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True) #Def
 
 # Prepare the optimizer
 optimizer = torch.optim.Adam(model.parameters(),
-                            #  lr=5e-5,
-                             betas=(0.9,0.98),
-                             eps=5e-8,
-                            #  weight_decay=0.2,
-                             weight_decay=0.3,
-                             amsgrad=True,
-                             lr=5e-9
+                             betas=BETAS,
+                             eps=EPS,
+                             weight_decay=WEIGHT_DECAY,
+                             amsgrad=AMSGRAD,
+                             lr=LR
                             ) # the lr is smaller, more safe for fine tuning to new dataset
 
 
