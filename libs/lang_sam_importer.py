@@ -27,10 +27,8 @@ def draw_image_v2(image, masks, boxes, labels, alpha=0.3,colors=['white'],draw_b
     return image.numpy().transpose(1, 2, 0)
 
 
-def write_detection_img(image_pil, masks, boxes, phrases, outpath,alpha=0.3,binary=False,clip=False):
+def write_detection_img(image_pil, masks, boxes, phrases, outpath,alpha=0.3,binary=False,clip=False,colors = ['white']):
     image_array = np.asarray(image_pil)
-
-    colors = ['white']
 
     if binary:
         image_array = np.zeros_like(image_array)
