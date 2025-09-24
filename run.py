@@ -1,16 +1,36 @@
 from libs.mapillary_funcs import *
+import argparse
+
+
+def parse_arguments():
+    """Parse command line arguments for class prompts and territories."""
+    parser = argparse.ArgumentParser(description='Deep Pavements Sample Picker')
+    
+    parser.add_argument('--classes', '-c', 
+                       nargs='+',
+                       default=['tree', 'vehicle'],
+                       help='List of class prompts for detection (default: tree vehicle)')
+    
+    parser.add_argument('--territories', '-t',
+                       nargs='+', 
+                       default=['Vitorino Brazil:1', 'Curitiba Brazil:1', 'Milan Italy:1', 'Arcole Italy:1'],
+                       help='List of territories with weights in format "territory:weight" (default: "Vitorino Brazil:1" "Curitiba Brazil:1" "Milan Italy:1" "Arcole Italy:1")')
+    
+    return parser.parse_args()
 
 
 def main():
+    # Parse command line arguments
+    args = parse_arguments()
     
     model = LangSAM()
-
 
     create_dir_if_not_exists(terr_polygons_folder)
     img_folderpath = None
 
-    territory_list = get_territories_as_list()
-    classes_list = get_classes_as_list()
+    # Get territories and classes from command line arguments
+    territory_list = get_territories_as_list(args.territories)
+    classes_list = get_classes_as_list(args.classes)
 
     gdfs_dict = {}
 
