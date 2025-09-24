@@ -43,6 +43,20 @@ python run.py --classes road sidewalk crosswalk --territories "New York USA:2" "
 python run.py -c road sidewalk -t "Berlin Germany:1" "Munich Germany:2"
 ```
 
+**Real-world example for pavement analysis:**
+```bash
+python run.py \
+  --classes "road surface" "asphalt" "concrete" "paving stones" "crosswalk" "manhole cover" \
+  --territories "San Francisco USA:3" "Amsterdam Netherlands:2" "Copenhagen Denmark:1"
+```
+
+**Urban infrastructure analysis:**
+```bash
+python run.py \
+  -c "bike lane" "sidewalk" "curb" "street sign" "traffic light" \
+  -t "Portland USA:2" "Barcelona Spain:2" "Vienna Austria:1"
+```
+
 ### Legacy CSV Configuration
 
 For backward compatibility, the application still supports CSV-based configuration. If no command line arguments are provided, it will fall back to reading from:
