@@ -28,20 +28,39 @@ def create_dir_if_not_exists(path):
 def read_csv_file(path):
     return pd.read_csv(path)
 
-def get_territories_as_list():
+def get_territories_as_list(territories_args=None):
+    """Get territories as list from CLI args or fallback to CSV file"""
+    if territories_args is not None:
+        # Parse territories from command line arguments
+        territory_list = []
+        for territory_weight in territories_args:
+            if ':' in territory_weight:
+                territory, weight_str = territory_weight.rsplit(':', 1)
+                try:
+                    weight = int(weight_str)
+                    territory_list.extend([territory] * weight)
+                except ValueError:
+                    print(f"Warning: Invalid weight '{weight_str}' for territory '{territory}', using weight 1")
+                    territory_list.append(territory)
+            else:
+                territory_list.append(territory_weight)
+        return territory_list
+    else:
+        # Fallback to CSV file for backward compatibility
+        as_df = read_csv_file(territories_path)
+        territories = []
+        for row in as_df.itertuples():
+            territories += [row.territory]*row.weight
+        return territories
 
-    as_df = read_csv_file(territories_path)
-
-    territories = []
-
-    for row in as_df.itertuples():
-        territories += [row.territory]*row.weight
-
-    return territories
-
-def get_classes_as_list():
-    as_df = read_csv_file(classes_path)
-    return [row.class_prompt for row in as_df.itertuples()]
+def get_classes_as_list(classes_args=None):
+    """Get classes as list from CLI args or fallback to CSV file"""
+    if classes_args is not None:
+        return classes_args
+    else:
+        # Fallback to CSV file for backward compatibility
+        as_df = read_csv_file(classes_path)
+        return [row.class_prompt for row in as_df.itertuples()]
 
 # getting an infinite circular iterator:
 def infinite_circular_iterator(iterable):
