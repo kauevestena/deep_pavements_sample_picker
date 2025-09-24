@@ -13,6 +13,7 @@ The sample picker can be configured using command line arguments:
 
 - `--classes` or `-c`: List of class prompts for detection
 - `--territories` or `-t`: List of territories with weights in format "territory:weight"
+- `--bbox` or `-b`: Bounding box in format "min_lon,min_lat,max_lon,max_lat" (alternative to territories)
 
 ### Examples
 
@@ -56,6 +57,40 @@ python run.py \
   -c "bike lane" "sidewalk" "curb" "street sign" "traffic light" \
   -t "Portland USA:2" "Barcelona Spain:2" "Vienna Austria:1"
 ```
+
+**Using direct bounding box (San Francisco downtown):**
+```bash
+python run.py --bbox "-122.42,37.76,-122.38,37.80" --classes "road surface" "crosswalk" "traffic light"
+```
+
+**Using bbox for specific area analysis (Central Paris):**
+```bash  
+python run.py -b "2.32,48.85,2.37,48.87" -c "cobblestone" "asphalt" "sidewalk" "tree"
+```
+
+**Bbox coordinates for major cities:**
+- San Francisco: `-122.5,37.7,-122.4,37.8`
+- Paris: `2.2,48.8,2.4,48.9`
+- London: `-0.2,51.4,0.1,51.6`
+- New York: `-74.1,40.6,-73.9,40.8`
+- Tokyo: `139.6,35.6,139.8,35.7`
+
+### Choosing Between Territories and Bounding Box
+
+**Use `--territories` when:**
+- You want to sample from entire cities or regions
+- You want automatic geographic boundary detection
+- You need weighted sampling across multiple locations
+- You want the system to handle geographic boundaries automatically
+
+**Use `--bbox` when:**
+- You need precise control over the sampling area
+- You're analyzing a specific neighborhood or district
+- You have exact coordinates from another mapping tool
+- You want to avoid API calls to Nominatim for territory lookup
+- You're doing comparative analysis across standardized areas
+
+**Note:** You cannot use both `--territories` and `--bbox` in the same command. Choose one approach based on your analysis needs.
 
 ### Legacy CSV Configuration
 
