@@ -102,51 +102,19 @@ def read_json(path):
     with open(path, 'r', encoding='utf-8') as f:
         return json.load(f)
     
-def get_territory_polygon(place_name,outpath=None):
-    # Make a request to Nominatim API with the place name
-    url = "https://nominatim.openstreetmap.org/search"
-    params = {"q": place_name, "format": "json", "polygon_geojson": 1}
-    response = requests.get(url, params=params)
-
-    # Parse the response as a JSON object
-    data = response.json()
-    
-    # sort data by "importance", that is a key in each dictionary of the list:
-    data.sort(key=lambda x: x["importance"], reverse=True)
-    
-    # removing all non-polygon objects:
-    data = [d for d in data if d['geojson']['type'] == 'Polygon']
-
-    # Get the polygon of the territory as a GeoJSON object
-    if data:
-        polygon = data[0]['geojson']
-
-        if outpath:
-            dump_json(polygon, outpath)
-
-        # Return the polygon
-        return polygon
+# get_territory_polygon moved to mapillary_funcs.py
 
 
 def tilerange_from_bbox(minlat,minlon,maxlat,maxlon,zoom=ZOOM_LEVEL):
     return mercantile.tiles(minlon,minlat,maxlon,maxlat,zoom)
 
 
-def tilebboxes_from_bbox(minlat,minlon,maxlat,maxlon,zoom=ZOOM_LEVEL,as_list=False):
-    if as_list:
-        return [list(mercantile.bounds(tile)) for tile in mercantile.tiles(minlon,minlat,maxlon,maxlat,zoom)]
-    else:
-        return [mercantile.bounds(tile) for tile in mercantile.tiles(minlon,minlat,maxlon,maxlat,zoom)]
+# tilebboxes_from_bbox moved to mapillary_funcs.py
     
-def resort_bbox(bbox):
-    return [bbox[1],bbox[0],bbox[3],bbox[2]]
+# resort_bbox moved to mapillary_funcs.py
 
 
-def tile_bbox_to_box(tile_bbox,swap_latlon=False):
-    if swap_latlon:
-        return box(tile_bbox.south,tile_bbox.west,tile_bbox.north,tile_bbox.east)
-    else:
-        return box(tile_bbox.west,tile_bbox.south,tile_bbox.east,tile_bbox.north)
+# tile_bbox_to_box moved to mapillary_funcs.py
     
 #function to define a random lat, lon in the bounding box:
 def random_point_in_bbox(input_bbox,as_point=False):
@@ -200,9 +168,7 @@ def selected_columns_to_str(df,desired_type=list):
             # print(column)
             df[column] = df[column].apply(lambda x: str(x))
 
-def get_coordinates_as_point(inputdict):
-
-    return Point(inputdict['coordinates'])
+# get_coordinates_as_point moved to mapillary_funcs.py
 
 def check_type_by_first_valid(input_iterable):
     for item in input_iterable:
